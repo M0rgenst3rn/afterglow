@@ -46,6 +46,7 @@ sheet("effekte.png", "Die Effekte einzeln", [
   { label: "Diffusion", sub: "Pro-Mist", p: Object.assign({}, Core.DEFAULTS, only, { diffusion: 80 }) },
   { label: "Lichtstreifen", sub: "anamorph", p: Object.assign({}, Core.DEFAULTS, only, { streaks: 85, streakLength: 70 }) },
   { label: "Sterne", sub: "Sternfilter, 6 Strahlen", p: Object.assign({}, Core.DEFAULTS, only, { stars: 90, starRays: 6, starLength: 45 }) },
+  { label: "Dunst", sub: "Nebel in der Luft, Türkis", p: Object.assign({}, Core.DEFAULTS, only, { haze: 85, hazeRadius: 60, hazeTint: 65 }) },
   { label: "Prisma", sub: "Farbsäume", p: Object.assign({}, Core.DEFAULTS, { prism: 100, amount: 100, saturation: 30 }) },
   { label: "Farbbereich", sub: "nur Pink leuchtet", p: Core.presetParams("pinkonly") },
   { label: "Eigene Farbe", sub: "Mondlicht", p: Core.presetParams("moon") },

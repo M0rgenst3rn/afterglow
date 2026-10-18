@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>Realistisches Leuchten für Photoshop: weicher Glow mit physikalischem Lichtabfall, Halation, Pro-Mist,
-  anamorphe Lichtstreifen und Sternfilter – für das ganze Dokument oder einzelne Ebenen, nicht-destruktiv.</b><br>
+  anamorphe Lichtstreifen, Sternfilter und Dunst – für das ganze Dokument oder einzelne Ebenen, nicht-destruktiv.</b><br>
   <sub>Photoshop 2023 (24.2) oder neuer · UXP-Panel</sub><br>
   <sub><b>MS</b> steht für <b>Morgenstern</b>: freie Photoshop-Tools · <a href="https://github.com/M0rgenst3rn/ms-distress">MS Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">MS Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">MS Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">MS Phase</a> · <b>MS Glow</b></sub>
 </p>
@@ -15,7 +15,7 @@
 
 MS Glow lässt die hellen Stellen deines Bilds leuchten, wie Licht durch eine Diffusionslinse oder auf altem
 Filmmaterial. Das Leuchten fällt wie echtes Licht ab: hell und dicht an der Lichtquelle, mit einem langen,
-weichen Ausläufer. Dazu kommen Halation, Pro-Mist, anamorphe Lichtstreifen, ein Sternfilter und Farbsäume.
+weichen Ausläufer. Dazu kommen Halation, Pro-Mist, Dunst, anamorphe Lichtstreifen, ein Sternfilter und Farbsäume.
 
 Alles wird prozedural berechnet, ohne Bilddateien. Jeder Effekt wird eine eigene Ebene, die dein Artwork nur
 aufhellt. Das Original bleibt unverändert.
@@ -26,20 +26,30 @@ aufhellt. Das Original bleibt unverändert.
 
 - **Ganzes Dokument oder einzelne Ebenen**: Beides ist nicht-destruktiv und lässt sich jederzeit entfernen
 - **Glow mit echtem Lichtabfall**: Stärke, Radius, Abfall, Kern schützen, Sättigung, Gamma und Farbe
-- **5 Effekte als eigene Ebenen**: Glow, Halation, Diffusion, Lichtstreifen und Sterne
+- **6 Effekte als eigene Ebenen**: Glow, Halation, Diffusion, Dunst, Lichtstreifen und Sterne
+- **Nur außen leuchten**: Das Objekt bleibt unverfärbt, der Schein liegt nur drumherum, z. B. eine Aura um Chrome-Schrift
 - **Nur ein Farbbereich**: z. B. nur Pink oder nur Gelb leuchten lassen
 - **Prisma**: Farbsäume wie bei einer echten Linse
-- **16 Looks** mit Vorschaubildern deines eigenen Motivs
+- **18 Looks** mit Vorschaubildern deines eigenen Motivs
 - **Vorschau** des ganzen Bilds oder als Detail in 1:1, dazu **Live** im Dokument
 - **Einstellungen in der Gruppe**: Gruppe auswählen, und das Panel lädt ihre Werte wieder
-- **Selbsttest**: 42 Prüfungen gegen das echte Photoshop-Ergebnis
+- **Selbsttest**: 47 Prüfungen gegen das echte Photoshop-Ergebnis
 
-## 16 Looks
+## 18 Looks
 
-<p align="center"><img src="docs/images/looks.png" alt="Alle 16 Looks"></p>
+<p align="center"><img src="docs/images/looks.png" alt="Alle 18 Looks"></p>
 
 Ein Klick auf einen Look setzt alle Regler. Danach bleibt jeder Wert frei einstellbar. Die Vorschaubilder im
 Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
+
+## Aura: nur außen leuchten
+
+<p align="center"><img src="docs/images/aura.png" alt="Chrome-Schrift mit Aura"></p>
+
+Mit **Nur außen** bleibt das Objekt selbst unverändert, und das Leuchten liegt nur drumherum. Im Beispiel ist das
+eine Chrome-Schrift aus [MS Render](https://github.com/M0rgenst3rn/ms-render) mit dem Look **Chrome-Aura**: Das
+Silber bleibt silbern, der Schein ist blau-violett. Bei „Nur ausgewählte Ebene“ nimmt MS Glow genau die Form der
+Ebene, im ganzen Dokument alles, was sich deutlich vom dunklen Hintergrund abhebt.
 
 ## Die Effekte
 
@@ -50,6 +60,7 @@ Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
 | **Glow** | Weiches Leuchten mit physikalischem Abfall | Negativ multiplizieren oder Linear abwedeln |
 | **Halation** | Rot-oranger Lichtsaum um helle Kanten, wie bei Filmmaterial | Negativ multiplizieren |
 | **Diffusion** | Nebliger Weichzeichner wie ein Pro-Mist-Filter, das ganze Bild leuchtet weich nach | Negativ multiplizieren |
+| **Dunst** | Sehr weiter Lichtschleier wie Nebel in der Luft, hebt die Schatten, mit eigener Farbe | Negativ multiplizieren |
 | **Lichtstreifen** | Lange, waagerechte Streifen an hellen Punkten, wie bei anamorphen Objektiven | Linear abwedeln |
 | **Sterne** | Sternfilter mit 4, 6 oder 8 Strahlen an einzelnen Lichtpunkten wie Lampen und Glanzlichtern | Linear abwedeln |
 
@@ -66,16 +77,18 @@ großen ein enger Hof um die Lichtquelle. So verhält sich das Leuchten wie echt
 | Bereich | Regler | Was er macht |
 |---|---|---|
 | Oben | **Gesamt-Deckkraft** | Stärke des ganzen Looks |
-| Lichtquellen | **Schwelle / Übergang / Gamma** | Ab welcher Helligkeit es leuchtet und wie weich der Übergang ist |
+| Lichtquellen | **Schwelle / Übergang / Gamma** | Ab welcher Helligkeit es leuchtet, wie weich der Übergang ist, und ob auch Mitteltöne (Gamma unter 100 %) oder nur die hellsten Stellen leuchten |
 | Lichtquellen | **Nur diese Farbe / Farbbereich** | Nur Farben nahe der gewählten leuchten, 0 % heißt alle |
 | Glow | **Stärke / Radius / Abfall** | Helligkeit, Reichweite und Verlauf des Leuchtens |
 | Glow | **Kern schützen** | Helle Flächen behalten ihre Zeichnung statt weiß zu werden |
+| Glow | **Nur außen** | Im Objekt selbst kein Glow, der Schein liegt nur drumherum |
 | Glow | **Sättigung / Prisma** | Farbigkeit des Leuchtens, Farbsäume (Rot reicht weiter als Blau) |
 | Glow | **Farbe des Lichts oder eigene Farbe / Mischmodus** | Leuchten in der Farbe der Quelle oder einer eigenen, als Negativ multiplizieren oder Linear abwedeln |
 | Film & Linse | **Halation / Radius / Farbe** | Lichtsaum um helle Kanten |
 | Film & Linse | **Diffusion / Radius** | Pro-Mist-Weichzeichner |
 | Film & Linse | **Lichtstreifen / Länge / Farbe** | Anamorphe Streifen |
 | Film & Linse | **Sterne / Strahlen-Länge / Drehung / Strahlen** | Sternfilter |
+| Dunst | **Dunst / Dunst-Weite / Färbung / Dunst-Farbe** | Nebel in der Luft, z. B. türkis wie in einer nebligen Stadt |
 
 Alle Größen beziehen sich auf die Bildhöhe. Der Look sieht deshalb bei jeder Dokumentgröße gleich aus, und
 die kleine Vorschau zeigt dasselbe wie das Ergebnis.
@@ -89,7 +102,8 @@ MS Glow           (Gruppe, Gesamt-Deckkraft)
 ├─ Lichtstreifen  Linear abwedeln
 ├─ Halation       Negativ multiplizieren
 ├─ Glow           Negativ multiplizieren (oder Linear abwedeln)
-└─ Diffusion      Negativ multiplizieren
+├─ Diffusion      Negativ multiplizieren
+└─ Dunst          Negativ multiplizieren
 ```
 Es entstehen nur die Ebenen der Effekte, die du eingeschaltet hast.
 
