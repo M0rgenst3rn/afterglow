@@ -32,7 +32,7 @@ aufhellt. Das Original bleibt unverändert.
 - **17 Looks** mit Vorschaubildern deines eigenen Motivs
 - **Vorschau** des ganzen Bilds oder als Detail in 1:1, dazu **Live** im Dokument
 - **Einstellungen in der Gruppe**: Gruppe auswählen, und das Panel lädt ihre Werte wieder
-- **Selbsttest**: 47 Prüfungen gegen das echte Photoshop-Ergebnis
+- **Selbsttest**: 46 Prüfungen gegen das echte Photoshop-Ergebnis
 
 ## 17 Looks
 
