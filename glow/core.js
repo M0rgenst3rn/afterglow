@@ -63,7 +63,6 @@ const PRESETS = [
   { id: "gold", name: "Gold", p: { amount: 80, threshold: 50, radius: 40, colorMode: "tint", tint: "#ffd27a", stars: 40, starRays: 8, starLength: 25 } },
   { id: "prism", name: "Prisma", p: { amount: 85, threshold: 45, radius: 45, prism: 80, saturation: 30 } },
   { id: "cyber", name: "Cyber", p: { amount: 100, threshold: 35, radius: 35, falloff: 55, prism: 60, saturation: 60, glowBlend: "linearDodge", streaks: 35, streakColor: "#3fd4ff" } },
-  { id: "pinkonly", name: "Nur Pink", p: { amount: 120, threshold: 20, radius: 40, rangeColor: "#ff3fa4", rangeWidth: 35, saturation: 40, glowBlend: "linearDodge" } },
   { id: "chromeaura", name: "Chrome-Aura", p: { colorMode: "tint", tint: "#6a5cff", amount: 190, radius: 60, falloff: 8, threshold: 35, knee: 60, gamma: 60, saturation: 50, protect: 20, outer: 100 } },
   { id: "fogcity", name: "Nebelstadt", p: { amount: 90, radius: 70, falloff: 20, threshold: 45, protect: 40, haze: 70, hazeRadius: 60, hazeColor: "#2fb8b0", hazeTint: 60, diffusion: 30 } },
   { id: "soft", name: "Weichzeichner", p: { amount: 20, threshold: 30, radius: 15, diffusion: 65, diffusionRadius: 20, protect: 50 } },

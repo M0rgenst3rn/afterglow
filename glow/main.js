@@ -26,31 +26,26 @@ const TARGET = [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }];
 const RENDER_NAMES = new Set(Core.LAYERS.map((l) => l.name));
 
 
+// Nur das Wichtigste sichtbar: Glow-Grundregler, je ein Regler pro Effekt; Feinheiten unten im Feintuning.
 const SLIDERS = [
-  { key: "opacity", label: "Gesamt-Deckkraft", min: 0, max: 100, step: 1, unit: "%", parent: "secStrengthTop" },
-  { key: "threshold", label: "Schwelle", min: 0, max: 100, step: 1, unit: "%", parent: "secSource", tip: "Ab welcher Helligkeit etwas leuchtet" },
-  { key: "knee", label: "Übergang", min: 0, max: 100, step: 1, unit: "%", parent: "secSource", tip: "Weicher Übergang an der Schwelle" },
-  { key: "gamma", label: "Gamma", min: 50, max: 200, step: 1, unit: "%", parent: "secSource", tip: "Höher = nur die hellsten Stellen leuchten kräftig" },
-  { key: "rangeWidth", label: "Farbbereich", min: 0, max: 100, step: 1, unit: "%", parent: "secRange", tip: "0 = alle Farben leuchten; sonst nur Farben nahe der gewählten" },
-  { key: "amount", label: "Stärke", min: 0, max: 200, step: 1, unit: "%", parent: "secGlow" },
-  { key: "radius", label: "Radius", min: 2, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Reichweite des Leuchtens" },
-  { key: "falloff", label: "Abfall", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Klein = weiter, flacher Schein; groß = eng um die Lichtquelle" },
-  { key: "protect", label: "Kern schützen", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Helle Flächen behalten ihre Zeichnung statt weiß zu werden" },
-  { key: "outer", label: "Nur außen", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Im Objekt selbst kein Glow – es bleibt unverfärbt, der Schein liegt nur drumherum" },
-  { key: "saturation", label: "Sättigung", min: -100, max: 100, step: 1, unit: "", parent: "secGlow" },
-  { key: "prism", label: "Prisma", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Farbsäume: Rot reicht weiter als Blau" },
+  { key: "opacity", label: "Deckkraft", min: 0, max: 100, step: 1, unit: "%", parent: "secStrengthTop" },
+  { key: "amount", label: "Stärke", min: 0, max: 200, step: 1, unit: "%", parent: "secGlowMain" },
+  { key: "radius", label: "Radius", min: 2, max: 100, step: 1, unit: "%", parent: "secGlowMain", tip: "Reichweite des Leuchtens" },
+  { key: "threshold", label: "Schwelle", min: 0, max: 100, step: 1, unit: "%", parent: "secGlowMain", tip: "Ab welcher Helligkeit etwas leuchtet" },
+  { key: "outer", label: "Nur außen", min: 0, max: 100, step: 1, unit: "%", parent: "secGlowMain", tip: "Im Objekt selbst kein Glow – es bleibt unverfärbt, der Schein liegt nur drumherum" },
   { key: "halation", label: "Halation", min: 0, max: 100, step: 1, unit: "%", parent: "secHalation", tip: "Rot-oranger Lichtsaum um helle Kanten, wie bei Film" },
-  { key: "halationRadius", label: "Halation-Radius", min: 5, max: 100, step: 1, unit: "%", parent: "secHalation", show: (p) => p.halation > 0 },
   { key: "diffusion", label: "Diffusion", min: 0, max: 100, step: 1, unit: "%", parent: "secDiffusion", tip: "Nebliger Weichzeichner (Pro-Mist)" },
-  { key: "diffusionRadius", label: "Diffusion-Radius", min: 5, max: 100, step: 1, unit: "%", parent: "secDiffusion", show: (p) => p.diffusion > 0 },
+  { key: "haze", label: "Dunst", min: 0, max: 100, step: 1, unit: "%", parent: "secHaze", tip: "Weiter Lichtschleier wie Nebel in der Luft" },
+  { key: "hazeRadius", label: "Dunst-Weite", min: 10, max: 100, step: 1, unit: "%", parent: "secHaze", sub: true, show: (p) => p.haze > 0 },
   { key: "streaks", label: "Lichtstreifen", min: 0, max: 100, step: 1, unit: "%", parent: "secStreaks", tip: "Anamorphe, waagerechte Streifen an hellen Punkten" },
-  { key: "streakLength", label: "Streifen-Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStreaks", show: (p) => p.streaks > 0 },
-  { key: "haze", label: "Dunst", min: 0, max: 100, step: 1, unit: "%", parent: "secHaze", tip: "Sehr weiter Lichtschleier wie Nebel in der Luft – hebt die Schatten" },
-  { key: "hazeRadius", label: "Dunst-Weite", min: 10, max: 100, step: 1, unit: "%", parent: "secHaze", show: (p) => p.haze > 0 },
-  { key: "hazeTint", label: "Färbung", min: 0, max: 100, step: 1, unit: "%", parent: "secHaze", show: (p) => p.haze > 0, tip: "Wie stark der Dunst die Dunst-Farbe annimmt" },
-  { key: "stars", label: "Sterne", min: 0, max: 100, step: 1, unit: "%", parent: "secStars", tip: "Sternfilter: Strahlen an den hellsten Punkten" },
-  { key: "starLength", label: "Strahlen-Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStars", show: (p) => p.stars > 0 },
-  { key: "starAngle", label: "Drehung", min: 0, max: 90, step: 1, unit: "°", parent: "secStars", show: (p) => p.stars > 0 },
+  { key: "streakLength", label: "Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStreaks", sub: true, show: (p) => p.streaks > 0 },
+  { key: "stars", label: "Sterne", min: 0, max: 100, step: 1, unit: "%", parent: "secStars", tip: "Sternfilter an einzelnen Lichtpunkten" },
+  { key: "starLength", label: "Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStars", sub: true, show: (p) => p.stars > 0 },
+  { key: "falloff", label: "Abfall", min: 0, max: 100, step: 1, unit: "%", parent: "secFine", tip: "Klein = weiter, flacher Schein; groß = eng um die Lichtquelle" },
+  { key: "protect", label: "Kern schützen", min: 0, max: 100, step: 1, unit: "%", parent: "secFine", tip: "Helle Flächen behalten ihre Zeichnung statt weiß zu werden" },
+  { key: "saturation", label: "Sättigung", min: -100, max: 100, step: 1, unit: "", parent: "secFine" },
+  { key: "gamma", label: "Gamma", min: 50, max: 200, step: 1, unit: "%", parent: "secFine", tip: "Unter 100 % leuchten auch Mitteltöne, darüber nur die hellsten Stellen" },
+  { key: "prism", label: "Prisma", min: 0, max: 100, step: 1, unit: "%", parent: "secFine", tip: "Farbsäume: Rot reicht weiter als Blau" },
 ];
 
 let params = loadParams();
@@ -331,30 +326,41 @@ function applyLook(id) {
 }
 
 // Farbfelder: [Element-ID, Parameter]
-const COLOR_FIELDS = [["tint", "tint"], ["rangeColor", "rangeColor"], ["halationColor", "halationColor"], ["streakColor", "streakColor"], ["hazeColor", "hazeColor"]];
+const COLOR_FIELDS = [["tint", "tint"], ["streakColor", "streakColor"], ["hazeColor", "hazeColor"]];
 function syncUI() {
   for (const key of Object.keys(ctl)) {
     const c = ctl[key];
     c.range.value = String(params[key]); c.num.value = String(params[key]);
-    c.row.className = c.def.show && !c.def.show(params) ? "ctl hidden" : "ctl";
+    c.row.className = "ctl" + (c.def.sub ? " sub" : "") + (c.def.show && !c.def.show(params) ? " hidden" : "");
   }
   document.querySelectorAll("#colorSeg .seg-btn").forEach((el) => { el.className = el.dataset.color === params.colorMode ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll("#targetSeg .seg-btn").forEach((el) => { el.className = el.dataset.target === target ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll("#previewModeSeg .seg-btn").forEach((el) => { el.className = el.dataset.mode === previewMode ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll(".look").forEach((el) => { el.className = el.dataset.id === activeLook ? "look active" : "look"; });
   $("lookName").textContent = activeLook ? "· " + Core.PRESETS.find((x) => x.id === activeLook).name : "";
-  $("tintRow").className = params.colorMode === "tint" ? "row" : "row hidden";
-  $("rangeRow").className = params.rangeWidth > 0 ? "row" : "row dim";
-  $("halationColorRow").className = params.halation > 0 ? "row" : "row hidden";
-  $("streakColorRow").className = params.streaks > 0 ? "row" : "row hidden";
-  $("starRaysRow").className = params.stars > 0 ? "row" : "row hidden";
-  $("hazeColorRow").className = params.haze > 0 ? "row" : "row hidden";
+  $("tintRow").className = params.colorMode === "tint" ? "swatch-wrap" : "swatch-wrap hidden";
+  $("streakColorRow").className = params.streaks > 0 ? "row sub" : "row sub hidden";
+  $("starRaysRow").className = params.stars > 0 ? "row sub" : "row sub hidden";
+  $("hazeColorRow").className = params.haze > 0 ? "row sub" : "row sub hidden";
   for (const [id, key] of COLOR_FIELDS) { $("hex-" + id).value = params[key]; $("swatch-" + id).style.backgroundColor = params[key]; }
   $("glowBlend").value = params.glowBlend;
   $("starRays").value = String(params.starRays);
-  $("apply").textContent = target === "document" ? "Look anwenden" : "Auf Ebene anwenden";
+  $("apply").textContent = target === "document" ? "Anwenden" : "Auf Ebene anwenden";
 }
 
+// Aufklappbare Bereiche; das Panel merkt sich, was offen war
+const SEC_KEY = "msglow.sections.v1";
+const SEC_DEFAULT = { looks: true, glow: true, effects: true, fine: false, more: false };
+function buildSections() {
+  let open = {};
+  try { open = Object.assign({}, SEC_DEFAULT, JSON.parse(localStorage.getItem(SEC_KEY) || "{}")); } catch (e) { open = Object.assign({}, SEC_DEFAULT); }
+  document.querySelectorAll(".sec").forEach((sec) => {
+    const name = sec.dataset.sec, head = sec.querySelector(".sec-head"), chev = sec.querySelector(".chev");
+    const apply = () => { sec.className = open[name] ? "sec" : "sec collapsed"; chev.textContent = open[name] ? "▾" : "▸"; };
+    head.addEventListener("click", () => { open[name] = !open[name]; apply(); try { localStorage.setItem(SEC_KEY, JSON.stringify(open)); } catch (e) { /* egal */ } });
+    apply();
+  });
+}
 function bindControls() {
   document.querySelectorAll("#colorSeg .seg-btn").forEach((el) => el.addEventListener("click", () => { params.colorMode = el.dataset.color; activeLook = null; syncUI(); changed(); }));
   document.querySelectorAll("#targetSeg .seg-btn").forEach((el) => el.addEventListener("click", () => {
@@ -1054,6 +1060,7 @@ const onPsEvent = debounce(() => {
 async function init() {
   log("START", { ps: app.version });
   buildSliders();
+  buildSections();
   buildStatic();
   bindControls();
   syncUI();

@@ -19,20 +19,20 @@
         "default": "MS Glow"
       },
       "minimumSize": {
-        "width": 260,
-        "height": 400
+        "width": 300,
+        "height": 480
       },
       "maximumSize": {
         "width": 900,
         "height": 4000
       },
       "preferredDockedSize": {
-        "width": 320,
-        "height": 760
+        "width": 340,
+        "height": 860
       },
       "preferredFloatingSize": {
-        "width": 340,
-        "height": 820
+        "width": 360,
+        "height": 900
       },
       "icons": [
         {
