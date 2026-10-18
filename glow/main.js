@@ -36,6 +36,7 @@ const SLIDERS = [
   { key: "radius", label: "Radius", min: 2, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Reichweite des Leuchtens" },
   { key: "falloff", label: "Abfall", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Klein = weiter, flacher Schein; groß = eng um die Lichtquelle" },
   { key: "protect", label: "Kern schützen", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Helle Flächen behalten ihre Zeichnung statt weiß zu werden" },
+  { key: "outer", label: "Nur außen", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Im Objekt selbst kein Glow – es bleibt unverfärbt, der Schein liegt nur drumherum" },
   { key: "saturation", label: "Sättigung", min: -100, max: 100, step: 1, unit: "", parent: "secGlow" },
   { key: "prism", label: "Prisma", min: 0, max: 100, step: 1, unit: "%", parent: "secGlow", tip: "Farbsäume: Rot reicht weiter als Blau" },
   { key: "halation", label: "Halation", min: 0, max: 100, step: 1, unit: "%", parent: "secHalation", tip: "Rot-oranger Lichtsaum um helle Kanten, wie bei Film" },
@@ -44,6 +45,9 @@ const SLIDERS = [
   { key: "diffusionRadius", label: "Diffusion-Radius", min: 5, max: 100, step: 1, unit: "%", parent: "secDiffusion", show: (p) => p.diffusion > 0 },
   { key: "streaks", label: "Lichtstreifen", min: 0, max: 100, step: 1, unit: "%", parent: "secStreaks", tip: "Anamorphe, waagerechte Streifen an hellen Punkten" },
   { key: "streakLength", label: "Streifen-Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStreaks", show: (p) => p.streaks > 0 },
+  { key: "haze", label: "Dunst", min: 0, max: 100, step: 1, unit: "%", parent: "secHaze", tip: "Sehr weiter Lichtschleier wie Nebel in der Luft – hebt die Schatten" },
+  { key: "hazeRadius", label: "Dunst-Weite", min: 10, max: 100, step: 1, unit: "%", parent: "secHaze", show: (p) => p.haze > 0 },
+  { key: "hazeTint", label: "Färbung", min: 0, max: 100, step: 1, unit: "%", parent: "secHaze", show: (p) => p.haze > 0, tip: "Wie stark der Dunst die Dunst-Farbe annimmt" },
   { key: "stars", label: "Sterne", min: 0, max: 100, step: 1, unit: "%", parent: "secStars", tip: "Sternfilter: Strahlen an den hellsten Punkten" },
   { key: "starLength", label: "Strahlen-Länge", min: 5, max: 100, step: 1, unit: "%", parent: "secStars", show: (p) => p.stars > 0 },
   { key: "starAngle", label: "Drehung", min: 0, max: 90, step: 1, unit: "°", parent: "secStars", show: (p) => p.stars > 0 },
@@ -327,7 +331,7 @@ function applyLook(id) {
 }
 
 // Farbfelder: [Element-ID, Parameter]
-const COLOR_FIELDS = [["tint", "tint"], ["rangeColor", "rangeColor"], ["halationColor", "halationColor"], ["streakColor", "streakColor"]];
+const COLOR_FIELDS = [["tint", "tint"], ["rangeColor", "rangeColor"], ["halationColor", "halationColor"], ["streakColor", "streakColor"], ["hazeColor", "hazeColor"]];
 function syncUI() {
   for (const key of Object.keys(ctl)) {
     const c = ctl[key];
@@ -344,6 +348,7 @@ function syncUI() {
   $("halationColorRow").className = params.halation > 0 ? "row" : "row hidden";
   $("streakColorRow").className = params.streaks > 0 ? "row" : "row hidden";
   $("starRaysRow").className = params.stars > 0 ? "row" : "row hidden";
+  $("hazeColorRow").className = params.haze > 0 ? "row" : "row hidden";
   for (const [id, key] of COLOR_FIELDS) { $("hex-" + id).value = params[key]; $("swatch-" + id).style.backgroundColor = params[key]; }
   $("glowBlend").value = params.glowBlend;
   $("starRays").value = String(params.starRays);
@@ -497,7 +502,7 @@ async function refreshPreviewSource() {
     ignoreEventsUntil = Date.now() + 600;
     const mk = (c, v, ps) => {
       const n = c.w * c.h, original = rgbOf(c.rgba, n, null);
-      const s = { w: c.w, h: c.h, pxScale: ps, sizeBase: dh, original };
+      const s = { w: c.w, h: c.h, pxScale: ps, sizeBase: dh, original, layerMode: target === "layers" };
       s.rgba = target === "document" ? c.rgba : downsample(lay.rgba, lay.w, lay.h, v.left - lb.left, v.top - lb.top, c.w, c.h, ps);
       return s;
     };
@@ -526,7 +531,7 @@ function targetKey(doc, info) { return target === "document" ? "doc:" + doc.id :
 function checksum(a) { let h = 0; for (let i = 0; i < a.length; i += 7) h = (h * 31 + a[i]) | 0; return h; }
 
 function renderOn(s, p) {
-  const res = Core.render({ rgba: s.rgba, w: s.w, h: s.h, pxScale: s.pxScale, sizeBase: s.sizeBase, params: p });
+  const res = Core.render({ rgba: s.rgba, w: s.w, h: s.h, pxScale: s.pxScale, sizeBase: s.sizeBase, layerMode: s.layerMode, params: p });
   return Core.composite(res, s.w, s.h, s.original);
 }
 let previewToken = 0;
@@ -579,6 +584,7 @@ async function makePixelLayer(doc, name, buf, w, h, off, mode, opacity) {
 function layerOpacity(p, layerMode) { return layerMode ? p.opacity : 100; }
 // Legt die Effekt-Ebenen von unten nach oben über der aktiven Ebene an; jede wird einzeln berechnet (wenig Speicher)
 async function makeEffectLayers(doc, o, off, layerMode) {
+  o.layerMode = layerMode;
   const p = Core.sanitize(o.params), made = [], keys = Core.layerKeys(p);
   const ls = Core.lightSources(o, Core.geometry(o));
   for (const def of Core.LAYERS.slice().reverse()) {
@@ -807,7 +813,7 @@ async function verifyLayerTarget(ctx, doc, t, p) {
   if (kids[kids.length - 1].id !== t.source.id) r.fehler.push("Original liegt nicht ganz unten");
   const b = layerRegion(doc, t.source);
   const px = await readLayer(ctx, doc, t.source, b, false);
-  const cg = await checkGroup(doc, t.group, { rgba: px.rgba, w: px.w, h: px.h, params: p, sizeBase: docBounds(doc).bottom }, b, t.source.id);
+  const cg = await checkGroup(doc, t.group, { rgba: px.rgba, w: px.w, h: px.h, params: p, sizeBase: docBounds(doc).bottom, layerMode: true }, b, t.source.id);
   r.fehler = r.fehler.concat(cg.fail); r.abweichung = cg.diff; r.ok = !r.fehler.length;
   return r;
 }
@@ -898,7 +904,9 @@ async function runSelfTest() {
     await docCase("Glow „Linear abwedeln“", { glowBlend: "linearDodge", amount: 120 });
     await docCase("Eigene Farbe + Prisma", { colorMode: "tint", tint: "#5ab0ff", prism: 90 });
     await docCase("Nur ein Farbbereich", { rangeColor: "#ffd250", rangeWidth: 40, threshold: 20 });
-    await docCase("Grenzen: alles voll", { amount: 200, radius: 100, falloff: 0, protect: 100, gamma: 200, saturation: 100, prism: 100, halation: 100, halationRadius: 100, diffusion: 100, diffusionRadius: 100, streaks: 100, streakLength: 100, stars: 100, starLength: 100 });
+    await docCase("Nur außen leuchten", { outer: 100, colorMode: "tint", tint: "#6a5cff", amount: 150 });
+    await docCase("Nur Dunst", Object.assign({}, only, { haze: 90, hazeRadius: 80, hazeTint: 70 }));
+    await docCase("Grenzen: alles voll", { amount: 200, radius: 100, falloff: 0, protect: 100, gamma: 200, saturation: 100, prism: 100, halation: 100, halationRadius: 100, diffusion: 100, diffusionRadius: 100, streaks: 100, streakLength: 100, stars: 100, starLength: 100, outer: 100, haze: 100, hazeRadius: 100, hazeTint: 100 });
     await docCase("Grenzen: Schwelle 100, Radius klein", { threshold: 100, radius: 2, falloff: 100, gamma: 50 });
     await docCase("Gesamt-Deckkraft 30", { opacity: 30 });
     await check("Alle Effekte aus: klare Meldung, keine Gruppe", async () => {
@@ -978,6 +986,25 @@ async function runSelfTest() {
         lit = px[(220 * 900 + 260) * 4 + 1]; hidden = px[(220 * 900 + 680) * 4 + 1];
       }, { commandName: HIST + " Test" });
       return { ok: v.ok && lit > 60 && hidden < 15, lit, hidden, v };
+    });
+    await check("Ebene „nur außen“: im Objekt kein Glow, daneben schon", async () => {
+      target = "layers"; params = Core.sanitize(Object.assign({}, D, only, { amount: 150, outer: 100, threshold: 10, protect: 0 }));
+      await core.executeAsModal(async () => { await selectLayers([textId]); }, { commandName: HIST + " Test" });
+      await applyEffect(false);
+      const v = await verifyNow(doc, params);
+      const t = (await resolveTargets(doc)).targets[0];
+      const gl = Array.from(t.group.layers).find((k) => k.name === "Glow"), tb = boundsOf(t.source);
+      let inside = 0, outside = 0, n = 0;
+      await core.executeAsModal(async () => {
+        const px = await readLayerRGBA(doc, gl.id, docBounds(doc)), al = await readLayer(null, doc, t.source, docBounds(doc), true);
+        for (let y = tb.top; y < tb.bottom; y++) for (let x = tb.left; x < tb.right; x++) {
+          const i = (y * 900 + x) * 4;
+          if (al.rgba[i + 3] > 250) { inside = Math.max(inside, px[i]); n++; }
+        }
+        const oy = Math.max(0, tb.top - 6), ox = Math.round((tb.left + tb.right) / 2);
+        outside = px[(oy * 900 + ox) * 4];
+      }, { commandName: HIST + " Test" });
+      return { ok: v.ok && n > 100 && inside < 40 && outside > 25, inside, outside, n, v };
     });
     await layerCase("Zwei Ebenen auf einmal", [artId, textId], { amount: 90, colorMode: "tint", tint: "#9cc4ff" });
     await check("Dokument-Look über Ebenen-Gruppen", async () => {

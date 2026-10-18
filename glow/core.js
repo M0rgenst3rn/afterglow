@@ -7,6 +7,7 @@
 //   diffusion  nebliger Weichzeichner (Pro-Mist): das ganze Bild leuchtet weich nach
 //   streaks    anamorphe Lichtstreifen (lang, waagerecht)
 //   stars      Sternfilter: Strahlen an den hellsten Punkten
+//   haze       Dunst: sehr weiter, farbiger Lichtschleier wie Nebel in der Luft
 // Alle Größen hängen an der Bildhöhe (sizeBase) – die kleine Vorschau sieht aus wie das Ergebnis.
 
 const DEFAULTS = {
@@ -16,6 +17,7 @@ const DEFAULTS = {
   radius: 35,            // Reichweite in % der halben Bildhöhe
   falloff: 50,           // Abfall: klein = weit und flach, groß = eng um die Lichtquelle
   protect: 45,           // Kern schützen: helle Flächen behalten ihre Zeichnung
+  outer: 0,              // nur außen leuchten: im Objekt selbst kein Glow (bleibt unverfärbt)
   gamma: 100,            // Gamma der Lichtquellen (%)
   saturation: 0,         // Sättigung des Glows
   colorMode: "original", // original | tint
@@ -36,6 +38,10 @@ const DEFAULTS = {
   starRays: 4,           // 4 | 6 | 8
   starLength: 40,
   starAngle: 0,
+  haze: 0,               // Dunst
+  hazeRadius: 60,
+  hazeColor: "#2fb8b0",
+  hazeTint: 50,          // wie stark der Dunst die Dunst-Farbe annimmt
   opacity: 100,          // Gesamt-Deckkraft
 };
 
@@ -58,6 +64,8 @@ const PRESETS = [
   { id: "prism", name: "Prisma", p: { amount: 85, threshold: 45, radius: 45, prism: 80, saturation: 30 } },
   { id: "cyber", name: "Cyber", p: { amount: 100, threshold: 35, radius: 35, falloff: 55, prism: 60, saturation: 60, glowBlend: "linearDodge", streaks: 35, streakColor: "#3fd4ff" } },
   { id: "pinkonly", name: "Nur Pink", p: { amount: 120, threshold: 20, radius: 40, rangeColor: "#ff3fa4", rangeWidth: 35, saturation: 40, glowBlend: "linearDodge" } },
+  { id: "chromeaura", name: "Chrome-Aura", p: { colorMode: "tint", tint: "#6a5cff", amount: 190, radius: 60, falloff: 8, threshold: 35, knee: 60, gamma: 60, saturation: 50, protect: 20, outer: 100 } },
+  { id: "fogcity", name: "Nebelstadt", p: { amount: 90, radius: 70, falloff: 20, threshold: 45, protect: 40, haze: 70, hazeRadius: 60, hazeColor: "#2fb8b0", hazeTint: 60, diffusion: 30 } },
   { id: "soft", name: "Weichzeichner", p: { amount: 20, threshold: 30, radius: 15, diffusion: 65, diffusionRadius: 20, protect: 50 } },
 ];
 function presetParams(id) { const pr = PRESETS.find((x) => x.id === id); return pr ? Object.assign({}, DEFAULTS, pr.p) : null; }
@@ -66,8 +74,9 @@ const RANGES = {
   threshold: [0, 100], knee: [0, 100], amount: [0, 200], radius: [2, 100], falloff: [0, 100], protect: [0, 100], gamma: [50, 200],
   saturation: [-100, 100], prism: [0, 100], rangeWidth: [0, 100], halation: [0, 100], halationRadius: [5, 100], diffusion: [0, 100],
   diffusionRadius: [5, 100], streaks: [0, 100], streakLength: [5, 100], stars: [0, 100], starLength: [5, 100], starAngle: [0, 90], opacity: [0, 100],
+  outer: [0, 100], haze: [0, 100], hazeRadius: [10, 100], hazeTint: [0, 100],
 };
-const COLOR_KEYS = ["tint", "rangeColor", "halationColor", "streakColor"];
+const COLOR_KEYS = ["tint", "rangeColor", "halationColor", "streakColor", "hazeColor"];
 function sanitize(p) {
   const out = Object.assign({}, DEFAULTS);
   if (!p || typeof p !== "object") return out;
@@ -154,15 +163,26 @@ function geometry(opts) {
 // Helle Stellen (vormultipliziert mit Alpha) als drei Float-Kanäle, dazu die Quell-Helligkeit
 function lightSources(opts, g) {
   const p = g.p, src = opts.rgba, N = g.N;
-  const R = new Float32Array(N), G = new Float32Array(N), B = new Float32Array(N), L = new Float32Array(N);
-  const t = p.threshold / 100, k = Math.max(0.01, p.knee / 100 * 0.5), gam = 100 / p.gamma;
+  const R = new Float32Array(N), G = new Float32Array(N), B = new Float32Array(N), L = new Float32Array(N), C = new Float32Array(N);
+  const t = p.threshold / 100, k = Math.max(0.01, p.knee / 100 * 0.5), gam = p.gamma / 100;   // < 100 %: auch Mitteltöne leuchten, > 100 %: nur die hellsten
   const tint = hexRgb(p.tint), sat = 1 + p.saturation / 100;
   const rc = hueOf(...hexRgb(p.rangeColor)), rw = p.rangeWidth / 100 * 90;
+  // Hintergrund-Helligkeit (10 %-Perzentil) – was deutlich heller ist, zählt bei „nur außen“ als Objekt
+  let bg = 0;
+  if (p.outer > 0 && !opts.layerMode) {
+    const hist = new Uint32Array(256), step = Math.max(1, Math.floor(N / 200000));
+    let n = 0;
+    for (let i = 0; i < N; i += step) { hist[Math.round((0.299 * src[i * 4] + 0.587 * src[i * 4 + 1] + 0.114 * src[i * 4 + 2]) * src[i * 4 + 3] / 255)]++; n++; }
+    let acc = 0;
+    for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= n * 0.1) { bg = v / 255; break; } }
+  }
   for (let i = 0; i < N; i++) {
     const a = src[i * 4 + 3] / 255;
     let r = src[i * 4] / 255, gg = src[i * 4 + 1] / 255, b = src[i * 4 + 2] / 255;
     const lum = 0.299 * r + 0.587 * gg + 0.114 * b;
     L[i] = lum * a;
+    // Objekt-Abdeckung: bei einer Ebene ihre Form, im ganzen Dokument die (etwas weiter gefassten) hellen Flächen
+    C[i] = opts.layerMode ? a : smooth(bg + 0.05, bg + 0.16, lum * a);
     let wgt = smooth(t - k, t + k, lum);
     if (wgt <= 0) continue;
     if (rw > 0) {   // nur ein Farbbereich leuchtet
@@ -176,7 +196,7 @@ function lightSources(opts, g) {
     if (sat !== 1) { const l = 0.299 * r + 0.587 * gg + 0.114 * b; r = Math.max(0, l + (r - l) * sat); gg = Math.max(0, l + (gg - l) * sat); b = Math.max(0, l + (b - l) * sat); }
     R[i] = r * wgt; G[i] = gg * wgt; B[i] = b * wgt;
   }
-  return { R, G, B, L };
+  return { R, G, B, L, C };
 }
 
 // ---------------------------------------------------------------- Effekte
@@ -201,14 +221,16 @@ function renderGlow(opts, ls) {
     }
     return out;
   });
-  const prot = p.protect / 100;
+  const prot = p.protect / 100, out = p.outer / 100;
+  // „nur außen“: Abdeckung ganz leicht weichzeichnen, damit der Schein sauber an der Kante beginnt
+  const cov = out > 0 ? blur2(ls.C, w, h, Math.max(1, g.unit * 0.25)) : null;
   return toRGBA(N, (i, c) => {
     const x = i % w, y = (i / w) | 0;
     for (let ch = 0; ch < 3; ch++) {
       let v = 0;
       const lv = levels[ch], ww = wc[ch];
       for (let k = 0; k < K; k++) v += ww[k] * at(lv[k], lv[k].s, x, y);
-      c[ch] = Math.min(1, v * amt * (1 - prot * ls.L[i]));
+      c[ch] = Math.min(1, v * amt * (1 - prot * ls.L[i]) * (cov ? 1 - out * Math.min(1, cov[i] * 1.4) : 1));
     }
   });
 }
@@ -242,6 +264,27 @@ function renderDiffusion(opts) {
     return { a: blur2(s.a, s.w, s.h, r / f), w: s.w, h: s.h };
   });
   return toRGBA(N, (i, c) => { const x = i % w, y = (i / w) | 0; for (let k = 0; k < 3; k++) c[k] = Math.min(1, Math.sqrt(Math.max(0, at(ch[k], f, x, y))) * amt); });
+}
+
+// Dunst: sehr weite Unschärfe des ganzen Bilds, hebt die Schatten wie Nebel in der Luft; mit eigener Farbe
+function renderHaze(opts) {
+  const g = geometry(opts), p = g.p, { w, h, N } = g, src = opts.rgba;
+  if (p.haze <= 0) return null;
+  const r = Math.max(2, p.hazeRadius / 100 * 50 * g.unit), f = Math.max(1, Math.floor(r / 5)), amt = p.haze / 100 * 1.1, tint = p.hazeTint / 100, hc = hexRgb(p.hazeColor);
+  const ch = [0, 1, 2].map((c) => {
+    const a = new Float32Array(N);
+    for (let i = 0; i < N; i++) a[i] = src[i * 4 + c] / 255 * src[i * 4 + 3] / 255;
+    const s = shrink(a, w, h, f);
+    return { a: blur2(blur2(s.a, s.w, s.h, r / f * 0.6), s.w, s.h, r / f * 0.6), w: s.w, h: s.h };
+  });
+  return toRGBA(N, (i, c) => {
+    const x = i % w, y = (i / w) | 0;
+    const v = [at(ch[0], f, x, y), at(ch[1], f, x, y), at(ch[2], f, x, y)], l = 0.299 * v[0] + 0.587 * v[1] + 0.114 * v[2];
+    for (let k = 0; k < 3; k++) {
+      const col = v[k] * (1 - tint) + Math.min(1, l * 1.8) * hc[k] * tint;   // Nebel nimmt Licht und Dunst-Farbe an
+      c[k] = Math.min(1, (col * 1.6 + hc[k] * 0.05 * tint) * amt);
+    }
+  });
 }
 
 // gerichtete Unschärfe mit exponentiellem Abfall entlang (dx, dy) auf einem verkleinerten Feld
@@ -350,10 +393,11 @@ const LAYERS = [
   { key: "halation", name: "Halation", mode: () => "screen" },
   { key: "glow", name: "Glow", mode: (p) => p.glowBlend },
   { key: "diffusion", name: "Diffusion", mode: () => "screen" },
+  { key: "haze", name: "Dunst", mode: () => "screen" },
 ];
 function layerKeys(p) {
   p = sanitize(p);
-  const has = { stars: p.stars > 0, streaks: p.streaks > 0, halation: p.halation > 0, glow: p.amount > 0, diffusion: p.diffusion > 0 };
+  const has = { stars: p.stars > 0, streaks: p.streaks > 0, halation: p.halation > 0, glow: p.amount > 0, diffusion: p.diffusion > 0, haze: p.haze > 0 };
   return LAYERS.filter((d) => has[d.key]).map((d) => d.key);
 }
 // eine Ebene berechnen (ls = Lichtquellen, einmal je Bild)
@@ -361,6 +405,7 @@ function renderLayer(key, opts, ls) {
   if (key === "glow") return renderGlow(opts, ls);
   if (key === "halation") return renderHalation(opts, ls);
   if (key === "diffusion") return renderDiffusion(opts);
+  if (key === "haze") return renderHaze(opts);
   if (key === "streaks") return renderStreaks(opts, ls);
   if (key === "stars") return renderStars(opts, ls);
   return null;
@@ -389,7 +434,7 @@ function composite(res, w, h, base) {
 function reachPct(p) {
   p = sanitize(p);
   return Math.max(p.amount > 0 ? p.radius / 100 * 50 : 0, p.halation > 0 ? p.halationRadius / 100 * 12 : 0, p.diffusion > 0 ? p.diffusionRadius / 100 * 16 : 0,
-    p.streaks > 0 ? p.streakLength / 100 * 60 : 0, p.stars > 0 ? p.starLength / 100 * 15 : 0) + 2;
+    p.streaks > 0 ? p.streakLength / 100 * 60 : 0, p.stars > 0 ? p.starLength / 100 * 15 : 0, p.haze > 0 ? p.hazeRadius / 100 * 100 : 0) + 2;
 }
 
 const api = { DEFAULTS, BLENDS, RAYS, PRESETS, RANGES, LAYERS, presetParams, sanitize, geometry, lightSources, renderLayer, render, composite, layerKeys, reachPct, hexRgb };
