@@ -1,4 +1,4 @@
-// Rendert eine rohe RGBA-Datei mit MS Glow und schreibt das zusammengesetzte Ergebnis als PNG.
+// Renders a raw RGBA file with MS Glow and writes the composited result as PNG.
 // node tools/render-test.js <in.raw> <w> <h> <out.png> [look-id | json]
 const fs = require("fs"), path = require("path");
 const Core = require(path.join(__dirname, "..", "glow", "core.js"));

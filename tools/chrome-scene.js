@@ -1,12 +1,12 @@
-// Chrome-Schrift als Szene für die README-Bilder: Text (Arial Black, kursiv) → Chrome aus der
-// MS-Render-Engine (Ordner daneben: ../../MS Render) → eigene Ebene über einem dunklen Hintergrund.
-// Liefert die Ebene (RGBA, transparent drumherum) und das fertige Hintergrundbild darunter (RGB).
+// Chrome lettering as the scene for the README images: text (Arial Black, italic) → chrome from the
+// Morgenstern Render engine (folder next to this one: ../../MS Render) → its own layer over a dark background.
+// Returns the layer (RGBA, transparent around it) and the finished image below it (RGB).
 const fs = require("fs"), path = require("path"), os = require("os"), { execFileSync } = require("child_process");
 const E = require(path.join(__dirname, "..", "..", "MS Render", "render", "engine.js"));
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "msglow-chrome-"));
 
-// Text als Alpha-Maske (Python + Pillow)
+// text as an alpha mask (Python + Pillow)
 function textAlpha(lines, px) {
   const f = path.join(TMP, "text.raw");
   const out = execFileSync("python3", ["-I", "-c", `
@@ -20,7 +20,7 @@ W = max(ws) + int(px * 0.5); H = lh * len(lines) + int(px * 0.3)
 im = Image.new("L", (W, H), 0); d = ImageDraw.Draw(im)
 for i, t in enumerate(lines):
     d.text(((W - ws[i]) // 2, int(px * 0.05) + i * lh), t, font=font, fill=255)
-# kursiv: nach rechts scheren
+# italic: shear to the right
 im = im.transform((W + int(H * 0.2), H), Image.AFFINE, (1, 0.2, -H * 0.2, 0, 1, 0), resample=Image.BICUBIC)
 bb = im.getbbox(); im = im.crop((bb[0] - 4, bb[1] - 4, bb[2] + 4, bb[3] + 4))
 open(sys.argv[1], "wb").write(im.tobytes())
@@ -29,7 +29,7 @@ print(im.size[0], im.size[1])
   return { alpha: new Uint8Array(fs.readFileSync(f)), w: out[0], h: out[1] };
 }
 
-// Hintergrund: fast schwarzes Nachtblau mit einem weichen Lichthof in der Mitte
+// background: near-black night blue with a soft halo in the centre
 function background(W, H, tint) {
   const rgb = new Uint8Array(W * H * 3), t = tint || [10, 16, 40];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -40,13 +40,13 @@ function background(W, H, tint) {
   return rgb;
 }
 
-// Szene bauen: lines = Textzeilen, W/H = Bildgröße, fill = Anteil der Bildbreite für die Schrift
+// build the scene: lines = text lines, W/H = image size, fill = share of the image width for the lettering
 function chromeScene(opts) {
   const { lines, W, H } = opts;
   const t = textAlpha(lines, opts.px || 300);
   const r = E.renderFromAlpha(t.alpha, t.w, t.h, Object.assign({ material: "chrome" }, opts.chrome || {}));
   const src = new Uint8Array(r.rgba.buffer, r.rgba.byteOffset, r.rgba.length);
-  // auf Bildgröße skalieren und mittig platzieren (bilinear)
+  // scale to the image size and centre it (bilinear)
   const fill = opts.fill || 0.72, s = Math.min(W * fill / r.w, H * (opts.fillH || 0.78) / r.h);
   const dw = Math.round(r.w * s), dh = Math.round(r.h * s), ox = Math.round((W - dw) / 2), oy = Math.round((H - dh) / 2 + (opts.dy || 0) * H);
   const layer = new Uint8Array(W * H * 4);

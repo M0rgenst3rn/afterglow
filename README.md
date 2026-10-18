@@ -3,181 +3,179 @@
 </p>
 
 <p align="center">
-  <b>Realistisches Leuchten für Photoshop: weicher Glow mit physikalischem Lichtabfall, Halation, Pro-Mist,
-  anamorphe Lichtstreifen, Sternfilter und Dunst – für das ganze Dokument oder einzelne Ebenen, nicht-destruktiv.</b><br>
-  <sub>Photoshop 2023 (24.2) oder neuer · UXP-Panel</sub><br>
-  <sub>Freie Photoshop-Tools von <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <b>Morgenstern Glow</b></sub>
+  <b>Realistic glow for Photoshop: soft light with a physical falloff, halation, Pro-Mist, anamorphic
+  streaks, star filter and haze – for the whole document or single layers, non-destructive.</b><br>
+  <sub>Photoshop 2023 (24.2) or newer · UXP panel</sub><br>
+  <sub>Free Photoshop tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <b>Morgenstern Glow</b></sub>
 </p>
 
 ---
 
-## Was ist Morgenstern Glow?
+## What is Morgenstern Glow?
 
-Morgenstern Glow lässt die hellen Stellen deines Bilds leuchten, wie Licht durch eine Diffusionslinse oder auf altem
-Filmmaterial. Das Leuchten fällt wie echtes Licht ab: hell und dicht an der Lichtquelle, mit einem langen,
-weichen Ausläufer. Dazu kommen Halation, Pro-Mist, Dunst, anamorphe Lichtstreifen, ein Sternfilter und Farbsäume.
+Morgenstern Glow makes the bright parts of your image glow, like light through a diffusion filter or on old
+film stock. The glow falls off like real light: bright and dense at the source, with a long, soft tail. On top
+of that there are halation, Pro-Mist, haze, anamorphic streaks, a star filter and colour fringes.
 
-Alles wird prozedural berechnet, ohne Bilddateien. Jeder Effekt wird eine eigene Ebene, die dein Artwork nur
-aufhellt. Das Original bleibt unverändert.
+Everything is computed procedurally, without image files. Every effect becomes its own layer that only
+brightens your artwork. The original stays untouched.
 
-<p align="center"><img src="docs/images/vorher-nachher.png" alt="Chrome-Schrift vorher und nachher"></p>
+<p align="center"><img src="docs/images/before-after.png" alt="Chrome lettering before and after"></p>
 
-Alle Bilder hier zeigen denselben Ablauf wie in Photoshop: eine Schrift, mit
-[Morgenstern Render](https://github.com/M0rgenst3rn/ms-render) in Chrome verwandelt, und darauf Morgenstern Glow
-mit „Nur Ebene“.
+Every image on this page shows the same workflow as in Photoshop: lettering turned into chrome with
+[Morgenstern Render](https://github.com/M0rgenst3rn/ms-render), and Morgenstern Glow on top with "Layer only".
 
 ### Highlights
 
-- **Ganzes Dokument oder einzelne Ebenen**: Beides ist nicht-destruktiv und lässt sich jederzeit entfernen
-- **Glow mit echtem Lichtabfall**: Stärke, Radius, Schwelle und Farbe, im Feintuning Abfall, Kern schützen, Sättigung, Gamma und Prisma
-- **6 Effekte als eigene Ebenen**: Glow, Halation, Diffusion, Dunst, Lichtstreifen und Sterne
-- **Nur außen leuchten**: Das Objekt bleibt unverfärbt, der Schein liegt nur drumherum, z. B. eine Aura um Chrome-Schrift
-- **Aufgeräumtes Panel**: aufklappbare Bereiche, eigene Farbpalette, das Wichtigste oben, alles Weitere im Feintuning
-- **17 Looks** mit Vorschaubildern deines eigenen Motivs
-- **Vorschau** des ganzen Bilds oder als Detail in 1:1, dazu **Live** im Dokument
-- **Einstellungen in der Gruppe**: Gruppe auswählen, und das Panel lädt ihre Werte wieder
-- **Selbsttest**: 46 Prüfungen gegen das echte Photoshop-Ergebnis
+- **Whole document or single layers**: both are non-destructive and can be removed at any time
+- **Glow with a real falloff**: amount, radius, threshold and colour; falloff, protect core, saturation, gamma and prism in Fine-tuning
+- **6 effects as separate layers**: glow, halation, diffusion, haze, streaks and stars
+- **Outside only**: the object keeps its colours and the light sits only around it, e.g. an aura around chrome lettering
+- **A tidy panel**: collapsible sections, its own colour palette, the essentials on top, everything else in Fine-tuning
+- **17 looks** with previews of your own image
+- **Preview** of the whole image or a 1:1 detail, plus **Live** in the document
+- **Settings live in the group**: select the group and the panel loads its values again
+- **Self-test**: 46 checks against the real Photoshop result
 
-## 17 Looks
+## 17 looks
 
-<p align="center"><img src="docs/images/looks.png" alt="Alle 17 Looks"></p>
+<p align="center"><img src="docs/images/looks.png" alt="All 17 looks"></p>
 
-Ein Klick auf einen Look setzt alle Regler. Danach bleibt jeder Wert frei einstellbar. Die Vorschaubilder im
-Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
+One click on a look sets every slider. After that every value stays freely adjustable. The look previews in
+the panel show each look with your own document or layer.
 
-## Aura: nur außen leuchten
+## Outside only
 
-<p align="center"><img src="docs/images/aura.png" alt="Glow über allem und nur außen im Vergleich"></p>
+<p align="center"><img src="docs/images/aura.png" alt="Glow over everything and outside only compared"></p>
 
-Links leuchtet auch die Schrift selbst, das Chrome wird hell und blau. Rechts ist **Nur außen** eingeschaltet:
-Das Chrome bleibt Chrome, und das Licht liegt nur drumherum. Bei „Nur Ebene“ nimmt Morgenstern Glow genau die
-Form der Ebene, im ganzen Dokument alles, was sich deutlich vom dunklen Hintergrund abhebt.
+On the left the lettering itself glows too, and the chrome turns bright and blue. On the right **Outside only**
+is on: the chrome stays chrome and the light sits only around it. With "Layer only" Morgenstern Glow takes
+exactly the shape of the layer; in the whole document it takes everything that clearly stands out from the
+dark background.
 
-## Die Effekte
+## The effects
 
-<p align="center"><img src="docs/images/effekte.png" alt="Die Effekte einzeln"></p>
+<p align="center"><img src="docs/images/effects.png" alt="The effects one by one"></p>
 
-| Effekt | Was passiert | Ebene |
+| Effect | What happens | Layer |
 |---|---|---|
-| **Glow** | Weiches Leuchten mit physikalischem Abfall | Negativ multiplizieren oder Linear abwedeln |
-| **Halation** | Rot-oranger Lichtsaum um helle Kanten, wie bei Filmmaterial | Negativ multiplizieren |
-| **Diffusion** | Nebliger Weichzeichner wie ein Pro-Mist-Filter, das ganze Bild leuchtet weich nach | Negativ multiplizieren |
-| **Dunst** | Sehr weiter Lichtschleier wie Nebel in der Luft, hebt die Schatten, mit eigener Farbe | Negativ multiplizieren |
-| **Lichtstreifen** | Lange, waagerechte Streifen an hellen Punkten, wie bei anamorphen Objektiven | Linear abwedeln |
-| **Sterne** | Sternfilter mit 4, 6 oder 8 Strahlen an einzelnen Lichtpunkten wie Lampen und Glanzlichtern | Linear abwedeln |
+| **Glow** | Soft light with a physical falloff | Screen or Linear Dodge |
+| **Halation** | Red-orange fringe around bright edges, like film stock | Screen |
+| **Diffusion** | Misty soft focus like a Pro-Mist filter, the whole image glows softly | Screen |
+| **Haze** | Very wide veil of light, like fog in the air; lifts the shadows, with its own colour | Screen |
+| **Streaks** | Long horizontal streaks on bright points, like anamorphic lenses | Linear Dodge |
+| **Stars** | Star filter with 4, 6 or 8 rays on single points of light like lamps and highlights | Linear Dodge |
 
-## Lichtabfall
+## Falloff
 
-<p align="center"><img src="docs/images/abfall.png" alt="Abfall weit, mittel, eng"></p>
+<p align="center"><img src="docs/images/falloff.png" alt="Falloff wide, medium, tight"></p>
 
-Der Glow besteht aus vielen überlagerten Unschärfe-Stufen, jede doppelt so groß wie die vorige. Wie stark die
-großen Stufen zählen, bestimmt der **Abfall**: Bei kleinen Werten entsteht ein weiter, flacher Schein, bei
-großen ein enger Hof um die Lichtquelle. So verhält sich das Leuchten wie echtes Licht.
+The glow is made of many stacked blur levels, each twice as large as the one before. How much the large
+levels count is set by **Falloff**: low values give a wide, flat glow, high values a tight halo around the
+light. That is how the glow behaves like real light.
 
-## Die Regler
+## The sliders
 
-| Bereich | Regler | Was er macht |
+| Section | Slider | What it does |
 |---|---|---|
-| Oben | **Deckkraft** | Stärke des ganzen Looks |
-| Glow | **Stärke / Radius / Schwelle** | Helligkeit und Reichweite des Leuchtens, ab welcher Helligkeit etwas leuchtet |
-| Glow | **Nur außen** | Im Objekt selbst kein Glow, der Schein liegt nur drumherum |
-| Glow | **Farbe: Vom Licht oder Eigene** | Leuchten in der Farbe der Quelle oder einer eigenen aus der Palette |
-| Effekte | **Halation** | Lichtsaum um helle Kanten |
-| Effekte | **Diffusion** | Pro-Mist-Weichzeichner |
-| Effekte | **Dunst / Dunst-Weite / Farbe** | Nebel in der Luft, z. B. türkis wie in einer nebligen Stadt |
-| Effekte | **Lichtstreifen / Länge / Farbe** | Anamorphe Streifen |
-| Effekte | **Sterne / Länge / Strahlen** | Sternfilter mit 4, 6 oder 8 Strahlen |
-| Feintuning | **Abfall / Kern schützen** | Verlauf des Leuchtens; helle Flächen behalten ihre Zeichnung |
-| Feintuning | **Sättigung / Gamma / Prisma** | Farbigkeit, ob auch Mitteltöne leuchten, Farbsäume (Rot reicht weiter als Blau) |
-| Feintuning | **Glow-Art: Weich oder Kräftig** | Negativ multiplizieren oder Linear abwedeln |
+| Top | **Opacity** | Strength of the whole look |
+| Glow | **Amount / Radius / Threshold** | Brightness and reach of the glow, and how bright something must be to glow |
+| Glow | **Outside only** | No glow on the object itself, the light sits only around it |
+| Glow | **Colour: From light or Custom** | Glow in the colour of the source or in one of your own from the palette |
+| Effects | **Halation** | Light fringe around bright edges |
+| Effects | **Diffusion** | Pro-Mist soft focus |
+| Effects | **Haze / Haze reach / Colour** | Fog in the air, e.g. teal like a foggy city |
+| Effects | **Streaks / Length / Colour** | Anamorphic streaks |
+| Effects | **Stars / Length / Rays** | Star filter with 4, 6 or 8 rays |
+| Fine-tuning | **Falloff / Protect core** | Shape of the glow; bright areas keep their detail |
+| Fine-tuning | **Saturation / Gamma / Prism** | Colourfulness, whether midtones glow too, colour fringes (red reaches further than blue) |
+| Fine-tuning | **Glow type: Soft or Strong** | Screen or Linear Dodge |
 
-Die Unter-Regler eines Effekts erscheinen erst, wenn der Effekt eingeschaltet ist. Ein Doppelklick auf einen
-Regler setzt ihn zurück.
+The sub-sliders of an effect only appear once the effect is on. Double-click a slider to reset it.
 
-Alle Größen beziehen sich auf die Bildhöhe. Der Look sieht deshalb bei jeder Dokumentgröße gleich aus, und
-die kleine Vorschau zeigt dasselbe wie das Ergebnis.
+All sizes refer to the image height. So the look is the same at any document size, and the small preview
+shows the same as the result.
 
-## Ebenen im Dokument
+## Layers in the document
 
-**Ganzes Dokument**: Oben im Dokument entsteht eine Gruppe **„MS Glow“**:
+**Whole document**: a group **"MS Glow"** is created at the top of the document:
 ```
-MS Glow           (Gruppe, Gesamt-Deckkraft)
-├─ Sterne         Linear abwedeln
-├─ Lichtstreifen  Linear abwedeln
-├─ Halation       Negativ multiplizieren
-├─ Glow           Negativ multiplizieren (oder Linear abwedeln)
-├─ Diffusion      Negativ multiplizieren
-└─ Dunst          Negativ multiplizieren
+MS Glow           (group, opacity)
+├─ Stars          Linear Dodge
+├─ Streaks        Linear Dodge
+├─ Halation       Screen
+├─ Glow           Screen (or Linear Dodge)
+├─ Diffusion      Screen
+└─ Haze           Screen
 ```
-Es entstehen nur die Ebenen der Effekte, die du eingeschaltet hast.
+Only the layers of the effects you turned on are created.
 
-**Nur Ebene**: Jede Ebene kommt in eine eigene Gruppe **„MS Glow · Name“**. Das Original liegt
-unverändert darin, die Effekt-Ebenen darüber. Das Leuchten darf über das Objekt hinausstrahlen. Ebenenmasken
-freigestellter Objekte werden berücksichtigt: Was die Maske verdeckt, leuchtet nicht. **Entfernen** stellt das
-Original an derselben Stelle wieder her.
+**Layer only**: every layer gets its own group **"MS Glow · name"**. The original sits inside it unchanged,
+the effect layers above it. The glow may reach beyond the object. Layer masks of cut-out objects are
+respected: whatever the mask hides doesn't glow. **Remove** puts the original back in the same place.
 
 ## Installation
 
-### macOS (empfohlen)
+### macOS (recommended)
 
-1. Repository herunterladen (**Code → Download ZIP**) und entpacken
-2. Im Terminal im entpackten Ordner ausführen:
+1. Download the repository (**Code → Download ZIP**) and unzip it
+2. Run this in Terminal inside the unzipped folder:
    ```bash
    bash install-mac.sh
    ```
-3. Photoshop (neu) starten → **Zusatzmodule (Plugins) › MS Glow**
+3. (Re)start Photoshop → **Plugins › MS Glow**
 
 ### Alternative: UXP Developer Tool (macOS & Windows)
 
-1. „UXP Developer Tools“ über die Creative-Cloud-App installieren
-2. In Photoshop unter *Einstellungen › Zusatzmodule* den **Entwicklermodus** aktivieren
-3. Im UXP Developer Tool **Add Plugin** wählen, dann `glow/manifest.json` → **Load**
+1. Install "UXP Developer Tools" from the Creative Cloud app
+2. In Photoshop, turn on **Developer Mode** under *Settings › Plugins*
+3. In the UXP Developer Tool choose **Add Plugin**, then `glow/manifest.json` → **Load**
 
-## So benutzt du es
+## How to use it
 
-1. **Ziel wählen**: unter der Vorschau **Ganzes Dokument** oder **Nur Ebene**. Darunter steht, was gerade bearbeitet wird
-2. **Look anklicken**: Die Vorschau zeigt das Ergebnis sofort
-3. **Feinschliff**: Mit **Schwelle** bestimmst du, was leuchtet, mit **Stärke**, **Radius** und **Abfall**, wie es leuchtet
-4. **Anwenden** klicken oder **Live** einschalten
-5. **Später ändern**: Gruppe auswählen, Werte anpassen, erneut anwenden. Das Panel lädt die Einstellungen der Gruppe
-6. **Entfernen** löscht den Look wieder. Bei Ebenen bleibt das Original unverändert stehen
+1. **Choose the target**: **Whole document** or **Layer only** below the preview. Below that you see what is being edited
+2. **Click a look**: the preview shows the result right away
+3. **Fine-tune**: **Threshold** decides what glows; **Amount**, **Radius** and **Falloff** decide how it glows
+4. Click **Apply** or turn on **Live**
+5. **Change it later**: select the group, adjust the values, apply again. The panel loads the group's settings
+6. **Remove** deletes the look again. With layers, the original stays as it was
 
-**Tipp:** Hat sich dein Artwork geändert, klicke erneut auf „Anwenden“. Die Gruppe wird dann neu berechnet.
+**Tip:** if your artwork has changed, click "Apply" again. The group is then recomputed.
 
-## Projektstruktur
+## Project structure
 
 ```
-glow/                Das Plugin (wird so in Photoshop geladen)
-  manifest.json      Plugin-Beschreibung
-  index.html         Panel-Oberfläche
-  main.js            Photoshop-Anbindung (Gruppen, Ebenen, Vorschau, Live, Prüfen, Selbsttest)
-  core.js            Licht-Engine, reines JavaScript
-install-mac.sh       Packt das Plugin (.ccx) und installiert es
-tools/               Test-Renderer, Testszene, Bilder dieser README, Icons
-docs/images/         Beispielbilder
+glow/                The plugin (loaded into Photoshop as is)
+  manifest.json      Plugin description
+  index.html         Panel UI
+  ms-ui.js/.css      Shared Morgenstern controls and design
+  main.js            Photoshop side (groups, layers, preview, Live, verify, self-test)
+  core.js            Light engine, plain JavaScript
+install-mac.sh       Packs the plugin (.ccx) and installs it
+tools/               Test renderer, README images, icons, browser preview of the panel
+docs/images/         Example images
 ```
 
 ```bash
-node tools/render-test.js in.raw 960 540 out.png dreamy   # einen Look ohne Photoshop rendern
-node tools/make-showcase.js                                # Bilder dieser README neu erzeugen (braucht Python mit Pillow)
+node tools/render-test.js in.raw 960 540 out.png dreamy   # render a look without Photoshop
+node tools/make-showcase.js                                # rebuild the images of this README (needs Python with Pillow and Morgenstern Render next to this folder)
 ```
 
-## Fehler gefunden? Ideen?
+## Found a bug? Got an idea?
 
-Melde dich gern! Am einfachsten über **[Issues](https://github.com/M0rgenst3rn/ms-glow/issues)** hier auf GitHub:
-**New issue** klicken und kurz beschreiben, was passiert ist. Hilfreich sind Photoshop-Version, Betriebssystem
-und gern ein Screenshot. Dafür brauchst du nur ein kostenloses GitHub-Konto. Verbesserungsvorschläge und
-Wünsche für neue Funktionen sind genauso willkommen.
+Get in touch! The easiest way is **[Issues](https://github.com/M0rgenst3rn/ms-glow/issues)** here on GitHub:
+click **New issue** and briefly describe what happened. Your Photoshop version, operating system and a
+screenshot help a lot. All you need is a free GitHub account. Suggestions and feature requests are just as
+welcome.
 
-## Lizenz
+## License
 
-[MIT](LICENSE): Du darfst den Code frei ansehen, verändern, weitergeben und auch kommerziell nutzen.
-Einzige Bedingung: Der Lizenzhinweis bleibt in Kopien enthalten.
+[MIT](LICENSE): you may freely read, change, share and also use the code commercially.
+The only condition: the license notice stays in copies.
 
-Adobe und Photoshop sind Marken von Adobe Inc. Dieses Projekt ist unabhängig und steht in keiner
-Verbindung zu Adobe.
+Adobe and Photoshop are trademarks of Adobe Inc. This project is independent and not affiliated with Adobe.
 
 ---
 
 <p align="center"><sub>Morgenstern Glow<br>
-Entwickelt von Linus Leinberger</sub></p>
+Made by Linus Leinberger</sub></p>

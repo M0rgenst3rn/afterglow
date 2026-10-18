@@ -1,30 +1,30 @@
 "use strict";
-// MS Glow – Kern-Engine (reines JavaScript, läuft im Panel und in Node).
-// Erzeugt Licht-Effekte aus den hellen Stellen eines Bilds. Jeder Effekt wird eine eigene Ebene, die über dem
-// Original liegt und es nur aufhellt (Negativ multiplizieren / Linear abwedeln) – das Original bleibt unberührt:
-//   glow       weiches Leuchten mit physikalischem Abfall (viele überlagerte Unschärfe-Stufen)
-//   halation   rot-oranger Lichtsaum um helle Kanten, wie bei Filmmaterial
-//   diffusion  nebliger Weichzeichner (Pro-Mist): das ganze Bild leuchtet weich nach
-//   streaks    anamorphe Lichtstreifen (lang, waagerecht)
-//   stars      Sternfilter: Strahlen an den hellsten Punkten
-//   haze       Dunst: sehr weiter, farbiger Lichtschleier wie Nebel in der Luft
-// Alle Größen hängen an der Bildhöhe (sizeBase) – die kleine Vorschau sieht aus wie das Ergebnis.
+// MS Glow – core engine (plain JavaScript, runs in the panel and in Node).
+// Creates light effects from the bright parts of an image. Each effect becomes its own layer that lies above the
+// original and only brightens it (Screen / Linear Dodge) – the original stays untouched:
+//   glow       soft light with a physical falloff (many stacked blur levels)
+//   halation   red-orange fringe around bright edges, like film stock
+//   diffusion  misty soft focus (Pro-Mist): the whole image glows softly
+//   streaks    anamorphic light streaks (long, horizontal)
+//   stars      star filter: rays on the brightest points
+//   haze       very wide, coloured veil of light, like fog in the air
+// All sizes depend on the image height (sizeBase) – the small preview looks like the result.
 
 const DEFAULTS = {
-  threshold: 55,         // ab welcher Helligkeit es leuchtet
-  knee: 40,              // weicher Übergang an der Schwelle
-  amount: 70,            // Stärke des Glows
-  radius: 35,            // Reichweite in % der halben Bildhöhe
-  falloff: 50,           // Abfall: klein = weit und flach, groß = eng um die Lichtquelle
-  protect: 45,           // Kern schützen: helle Flächen behalten ihre Zeichnung
-  outer: 0,              // nur außen leuchten: im Objekt selbst kein Glow (bleibt unverfärbt)
-  gamma: 100,            // Gamma der Lichtquellen (%)
-  saturation: 0,         // Sättigung des Glows
+  threshold: 55,         // how bright something must be to glow
+  knee: 40,              // soft transition at the threshold
+  amount: 70,            // glow amount
+  radius: 35,            // reach in % of half the image height
+  falloff: 50,           // falloff: low = wide and flat, high = tight around the light
+  protect: 45,           // protect core: bright areas keep their detail
+  outer: 0,              // glow outside only: no glow on the object itself (keeps its colours)
+  gamma: 100,            // gamma of the light sources (%)
+  saturation: 0,         // glow saturation
   colorMode: "original", // original | tint
   tint: "#ffcf9a",
-  prism: 0,              // Farbsäume: Rot reicht weiter als Blau
-  rangeColor: "#ff3fa4", // nur dieser Farbbereich leuchtet …
-  rangeWidth: 0,         // … 0 = aus
+  prism: 0,              // colour fringes: red reaches further than blue
+  rangeColor: "#ff3fa4", // only this colour range glows …
+  rangeWidth: 0,         // … 0 = off
   glowBlend: "screen",   // screen | linearDodge
   halation: 0,
   halationRadius: 30,
@@ -38,34 +38,34 @@ const DEFAULTS = {
   starRays: 4,           // 4 | 6 | 8
   starLength: 40,
   starAngle: 0,
-  haze: 0,               // Dunst
+  haze: 0,               // haze
   hazeRadius: 60,
   hazeColor: "#2fb8b0",
-  hazeTint: 50,          // wie stark der Dunst die Dunst-Farbe annimmt
-  opacity: 100,          // Gesamt-Deckkraft
+  hazeTint: 50,          // how strongly the haze takes on the haze colour
+  opacity: 100,          // overall opacity
 };
 
-const BLENDS = [{ id: "screen", name: "Negativ multiplizieren" }, { id: "linearDodge", name: "Linear abwedeln (Hinzufügen)" }];
+const BLENDS = [{ id: "screen", name: "Screen" }, { id: "linearDodge", name: "Linear Dodge (Add)" }];
 const RAYS = [4, 6, 8];
 
 const PRESETS = [
-  { id: "dreamy", name: "Traumhaft", p: {} },
+  { id: "dreamy", name: "Dreamy", p: {} },
   { id: "promist", name: "Pro-Mist", p: { amount: 35, threshold: 40, radius: 25, diffusion: 45, diffusionRadius: 30, protect: 35 } },
-  { id: "halation", name: "Filmhalation", p: { amount: 40, threshold: 62, radius: 20, halation: 70, halationRadius: 25, protect: 40 } },
-  { id: "ethereal", name: "Ätherisch", p: { amount: 90, threshold: 35, knee: 60, radius: 70, falloff: 25, diffusion: 30, protect: 30 } },
+  { id: "halation", name: "Film halation", p: { amount: 40, threshold: 62, radius: 20, halation: 70, halationRadius: 25, protect: 40 } },
+  { id: "ethereal", name: "Ethereal", p: { amount: 90, threshold: 35, knee: 60, radius: 70, falloff: 25, diffusion: 30, protect: 30 } },
   { id: "neon", name: "Neon", p: { amount: 110, threshold: 30, radius: 30, falloff: 60, saturation: 45, glowBlend: "linearDodge", protect: 10 } },
-  { id: "anamorphic", name: "Anamorph", p: { amount: 55, threshold: 65, radius: 25, streaks: 75, streakLength: 70 } },
-  { id: "starfilter", name: "Sternfilter", p: { amount: 50, threshold: 68, radius: 20, stars: 80, starRays: 4, starLength: 45, starAngle: 0 } },
-  { id: "stage", name: "Bühnenlicht", p: { amount: 70, threshold: 60, radius: 35, stars: 55, starRays: 6, starLength: 35, starAngle: 15, streaks: 45, streakLength: 55 } },
-  { id: "sunset", name: "Abendsonne", p: { amount: 85, threshold: 45, radius: 55, falloff: 35, colorMode: "tint", tint: "#ffb060", halation: 30 } },
-  { id: "moon", name: "Mondlicht", p: { amount: 75, threshold: 50, radius: 50, falloff: 40, colorMode: "tint", tint: "#9cc4ff", diffusion: 25 } },
-  { id: "candle", name: "Kerzenlicht", p: { amount: 95, threshold: 55, radius: 40, falloff: 55, colorMode: "tint", tint: "#ff9a3a", halation: 40, halationColor: "#ff5a10" } },
+  { id: "anamorphic", name: "Anamorphic", p: { amount: 55, threshold: 65, radius: 25, streaks: 75, streakLength: 70 } },
+  { id: "starfilter", name: "Star filter", p: { amount: 50, threshold: 68, radius: 20, stars: 80, starRays: 4, starLength: 45, starAngle: 0 } },
+  { id: "stage", name: "Stage light", p: { amount: 70, threshold: 60, radius: 35, stars: 55, starRays: 6, starLength: 35, starAngle: 15, streaks: 45, streakLength: 55 } },
+  { id: "sunset", name: "Sunset", p: { amount: 85, threshold: 45, radius: 55, falloff: 35, colorMode: "tint", tint: "#ffb060", halation: 30 } },
+  { id: "moon", name: "Moonlight", p: { amount: 75, threshold: 50, radius: 50, falloff: 40, colorMode: "tint", tint: "#9cc4ff", diffusion: 25 } },
+  { id: "candle", name: "Candlelight", p: { amount: 95, threshold: 55, radius: 40, falloff: 55, colorMode: "tint", tint: "#ff9a3a", halation: 40, halationColor: "#ff5a10" } },
   { id: "gold", name: "Gold", p: { amount: 80, threshold: 50, radius: 40, colorMode: "tint", tint: "#ffd27a", stars: 40, starRays: 8, starLength: 25 } },
-  { id: "prism", name: "Prisma", p: { amount: 85, threshold: 45, radius: 45, prism: 80, saturation: 30 } },
+  { id: "prism", name: "Prism", p: { amount: 85, threshold: 45, radius: 45, prism: 80, saturation: 30 } },
   { id: "cyber", name: "Cyber", p: { amount: 100, threshold: 35, radius: 35, falloff: 55, prism: 60, saturation: 60, glowBlend: "linearDodge", streaks: 35, streakColor: "#3fd4ff" } },
-  { id: "chromeaura", name: "Chrome-Aura", p: { colorMode: "tint", tint: "#6a5cff", amount: 190, radius: 60, falloff: 8, threshold: 35, knee: 60, gamma: 60, saturation: 50, protect: 20, outer: 100 } },
-  { id: "fogcity", name: "Nebelstadt", p: { amount: 90, radius: 70, falloff: 20, threshold: 45, protect: 40, haze: 70, hazeRadius: 60, hazeColor: "#2fb8b0", hazeTint: 60, diffusion: 30 } },
-  { id: "soft", name: "Weichzeichner", p: { amount: 20, threshold: 30, radius: 15, diffusion: 65, diffusionRadius: 20, protect: 50 } },
+  { id: "chromeaura", name: "Chrome aura", p: { colorMode: "tint", tint: "#6a5cff", amount: 190, radius: 60, falloff: 8, threshold: 35, knee: 60, gamma: 60, saturation: 50, protect: 20, outer: 100 } },
+  { id: "fogcity", name: "Fog city", p: { amount: 90, radius: 70, falloff: 20, threshold: 45, protect: 40, haze: 70, hazeRadius: 60, hazeColor: "#2fb8b0", hazeTint: 60, diffusion: 30 } },
+  { id: "soft", name: "Soft focus", p: { amount: 20, threshold: 30, radius: 15, diffusion: 65, diffusionRadius: 20, protect: 50 } },
 ];
 function presetParams(id) { const pr = PRESETS.find((x) => x.id === id); return pr ? Object.assign({}, DEFAULTS, pr.p) : null; }
 
@@ -91,7 +91,7 @@ function sanitize(p) {
   return out;
 }
 
-// ---------------------------------------------------------------- Helfer
+// ---------------------------------------------------------------- Helpers
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smooth = (a, b, x) => { const t = clamp01((x - a) / Math.max(1e-6, b - a)); return t * t * (3 - 2 * t); };
 function hexRgb(h) { const n = parseInt(String(h).slice(1), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; }
@@ -102,7 +102,7 @@ function hueOf(r, g, b) {
   if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
   return { h: (h * 60 + 360) % 360, s: d / (mx || 1) };
 }
-// Box-Blur (2 Durchgänge ≈ Gauß) in x und y
+// box blur (2 passes ≈ Gaussian) in x and y
 function boxBlur(src, w, h, rx, ry) {
   rx = Math.max(0, Math.round(rx)); ry = Math.max(0, Math.round(ry === undefined ? rx : ry));
   let a = src;
@@ -127,7 +127,7 @@ function boxBlur(src, w, h, rx, ry) {
   return a;
 }
 const blur2 = (a, w, h, rx, ry) => boxBlur(boxBlur(a, w, h, rx * 0.6, (ry === undefined ? rx : ry) * 0.6), w, h, rx * 0.6, (ry === undefined ? rx : ry) * 0.6);
-// halbe Auflösung (2×2-Mittel)
+// half resolution (2×2 average)
 function half(a, w, h) {
   const W = Math.max(1, Math.ceil(w / 2)), H = Math.max(1, Math.ceil(h / 2)), out = new Float32Array(W * H);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -136,7 +136,7 @@ function half(a, w, h) {
   }
   return { a: out, w: W, h: H };
 }
-// verkleinert um Faktor f (Box-Mittel)
+// downsample by factor f (box average)
 function shrink(a, w, h, f) {
   if (f <= 1) return { a, w, h };
   const W = Math.max(1, Math.ceil(w / f)), H = Math.max(1, Math.ceil(h / f)), out = new Float32Array(W * H), cnt = new Float32Array(W * H);
@@ -144,7 +144,7 @@ function shrink(a, w, h, f) {
   for (let j = 0; j < out.length; j++) out[j] /= cnt[j] || 1;
   return { a: out, w: W, h: H };
 }
-// bilinear an Original-Pixel (x, y) aus einem um s verkleinerten Feld
+// bilinear at original pixel (x, y) from a field downsampled by s
 function at(f, s, x, y) {
   let fx = (x + 0.5) / s - 0.5, fy = (y + 0.5) / s - 0.5;
   if (fx < 0) fx = 0; else if (fx > f.w - 1) fx = f.w - 1;
@@ -153,20 +153,20 @@ function at(f, s, x, y) {
   return (a[y0 * W + x0] * (1 - tx) + a[y0 * W + x1] * tx) * (1 - ty) + (a[y1 * W + x0] * (1 - tx) + a[y1 * W + x1] * tx) * ty;
 }
 
-// ---------------------------------------------------------------- Lichtquellen
-// opts: { rgba, w, h, pxScale (Ziel-Pixel je Bildpixel), sizeBase (Bezugshöhe in Ziel-Pixeln), params }
+// ---------------------------------------------------------------- Light sources
+// opts: { rgba, w, h, pxScale (target pixels per image pixel), sizeBase (reference height in target pixels), params }
 function geometry(opts) {
   const p = sanitize(opts.params), ps = opts.pxScale || 1, base = opts.sizeBase || opts.h * ps;
-  return { p, w: opts.w, h: opts.h, N: opts.w * opts.h, ps, base, unit: base / ps / 100 };   // unit: 1 % der Bildhöhe in Bildpixeln
+  return { p, w: opts.w, h: opts.h, N: opts.w * opts.h, ps, base, unit: base / ps / 100 };   // unit: 1 % of the image height in image pixels
 }
-// Helle Stellen (vormultipliziert mit Alpha) als drei Float-Kanäle, dazu die Quell-Helligkeit
+// Bright parts (premultiplied by alpha) as three float channels, plus the source brightness
 function lightSources(opts, g) {
   const p = g.p, src = opts.rgba, N = g.N;
   const R = new Float32Array(N), G = new Float32Array(N), B = new Float32Array(N), L = new Float32Array(N), C = new Float32Array(N);
-  const t = p.threshold / 100, k = Math.max(0.01, p.knee / 100 * 0.5), gam = p.gamma / 100;   // < 100 %: auch Mitteltöne leuchten, > 100 %: nur die hellsten
+  const t = p.threshold / 100, k = Math.max(0.01, p.knee / 100 * 0.5), gam = p.gamma / 100;   // < 100 %: midtones glow too, > 100 %: only the brightest
   const tint = hexRgb(p.tint), sat = 1 + p.saturation / 100;
   const rc = hueOf(...hexRgb(p.rangeColor)), rw = p.rangeWidth / 100 * 90;
-  // Hintergrund-Helligkeit (10 %-Perzentil) – was deutlich heller ist, zählt bei „nur außen“ als Objekt
+  // background brightness (10th percentile) – anything clearly brighter counts as the object for "outside only"
   let bg = 0;
   if (p.outer > 0 && !opts.layerMode) {
     const hist = new Uint32Array(256), step = Math.max(1, Math.floor(N / 200000));
@@ -180,11 +180,11 @@ function lightSources(opts, g) {
     let r = src[i * 4] / 255, gg = src[i * 4 + 1] / 255, b = src[i * 4 + 2] / 255;
     const lum = 0.299 * r + 0.587 * gg + 0.114 * b;
     L[i] = lum * a;
-    // Objekt-Abdeckung: bei einer Ebene ihre Form, im ganzen Dokument die (etwas weiter gefassten) hellen Flächen
+    // object coverage: for a layer its shape, in the whole document the (slightly wider) bright areas
     C[i] = opts.layerMode ? a : smooth(bg + 0.05, bg + 0.16, lum * a);
     let wgt = smooth(t - k, t + k, lum);
     if (wgt <= 0) continue;
-    if (rw > 0) {   // nur ein Farbbereich leuchtet
+    if (rw > 0) {   // only one colour range glows
       const hs = hueOf(r, gg, b);
       let dh = Math.abs(hs.h - rc.h); if (dh > 180) dh = 360 - dh;
       wgt *= (1 - smooth(rw * 0.6, rw, dh)) * smooth(0.12, 0.3, hs.s);
@@ -198,20 +198,20 @@ function lightSources(opts, g) {
   return { R, G, B, L, C };
 }
 
-// ---------------------------------------------------------------- Effekte
+// ---------------------------------------------------------------- Effects
 const toRGBA = (N, fn) => { const out = new Uint8ClampedArray(N * 4); const c = [0, 0, 0]; for (let i = 0; i < N; i++) { fn(i, c); out[i * 4] = c[0] * 255; out[i * 4 + 1] = c[1] * 255; out[i * 4 + 2] = c[2] * 255; out[i * 4 + 3] = 255; } return out; };
 
-// Glow: Pyramide aus Unschärfe-Stufen, jede Stufe doppelt so groß; ihre Gewichte bilden den Abfall
-// (~ inverse Quadrate: viel Licht nah an der Quelle, ein langer, schwacher Ausläufer).
+// Glow: pyramid of blur levels, each twice as large; their weights form the falloff
+// (~ inverse square: much light close to the source, a long, faint tail).
 function renderGlow(opts, ls) {
   const g = geometry(opts), p = g.p, { w, h, N } = g;
   if (p.amount <= 0) return null;
-  const rmax = Math.max(1.5, p.radius / 100 * 50 * g.unit);   // in Bildpixeln
+  const rmax = Math.max(1.5, p.radius / 100 * 50 * g.unit);   // in image pixels
   const K = Math.max(1, Math.min(12, Math.ceil(Math.log2(rmax / 1.5)) + 1));
   const e = 0.05 + p.falloff / 100 * 1.1, pr = p.prism / 100 * 0.5;
   const wts = (ex) => { const a = []; let s = 0; for (let k = 0; k < K; k++) { a.push(Math.pow(2, -k * ex)); s += a[k]; } return a.map((v) => v / s); };
   const wc = [wts(Math.max(0.05, e - pr)), wts(e), wts(e + pr)];
-  const amt = p.amount / 100 * (1 + 0.32 * K);   // mehr Stufen = mehr Licht im weiten Hof
+  const amt = p.amount / 100 * (1 + 0.32 * K);   // more levels = more light in the wide halo
   const levels = [ls.R, ls.G, ls.B].map((ch) => {
     const out = []; let cur = { a: ch, w, h }, s = 1;
     for (let k = 0; k < K; k++) {
@@ -221,7 +221,7 @@ function renderGlow(opts, ls) {
     return out;
   });
   const prot = p.protect / 100, out = p.outer / 100;
-  // „nur außen“: die (kantengeglättete) Form des Objekts – innen kein Glow, der Schein beginnt an der Kante
+  // "outside only": the (anti-aliased) shape of the object – no glow inside, the light starts at the edge
   const cov = out > 0 ? ls.C : null;
   return toRGBA(N, (i, c) => {
     const x = i % w, y = (i / w) | 0;
@@ -234,7 +234,7 @@ function renderGlow(opts, ls) {
   });
 }
 
-// Halation: Ring um helle Kanten (weite minus enge Unschärfe), in Filmfarbe
+// Halation: ring around bright edges (wide minus tight blur), in film colour
 function renderHalation(opts, ls) {
   const g = geometry(opts), p = g.p, { w, h, N } = g;
   if (p.halation <= 0) return null;
@@ -251,21 +251,21 @@ function renderHalation(opts, ls) {
   });
 }
 
-// Diffusion: das ganze Bild weich nachleuchten lassen (Pro-Mist)
+// Diffusion: let the whole image glow softly (Pro-Mist)
 function renderDiffusion(opts) {
   const g = geometry(opts), p = g.p, { w, h, N } = g, src = opts.rgba;
   if (p.diffusion <= 0) return null;
   const r = Math.max(1, p.diffusionRadius / 100 * 8 * g.unit), f = Math.max(1, Math.floor(r / 4)), amt = p.diffusion / 100 * 0.75;
   const ch = [0, 1, 2].map((c) => {
     const a = new Float32Array(N);
-    for (let i = 0; i < N; i++) { const v = src[i * 4 + c] / 255 * src[i * 4 + 3] / 255; a[i] = v * v; }   // helle Teile tragen mehr
+    for (let i = 0; i < N; i++) { const v = src[i * 4 + c] / 255 * src[i * 4 + 3] / 255; a[i] = v * v; }   // bright parts carry more
     const s = shrink(a, w, h, f);
     return { a: blur2(s.a, s.w, s.h, r / f), w: s.w, h: s.h };
   });
   return toRGBA(N, (i, c) => { const x = i % w, y = (i / w) | 0; for (let k = 0; k < 3; k++) c[k] = Math.min(1, Math.sqrt(Math.max(0, at(ch[k], f, x, y))) * amt); });
 }
 
-// Dunst: sehr weite Unschärfe des ganzen Bilds, hebt die Schatten wie Nebel in der Luft; mit eigener Farbe
+// Haze: very wide blur of the whole image, lifts the shadows like fog in the air; with its own colour
 function renderHaze(opts) {
   const g = geometry(opts), p = g.p, { w, h, N } = g, src = opts.rgba;
   if (p.haze <= 0) return null;
@@ -280,13 +280,13 @@ function renderHaze(opts) {
     const x = i % w, y = (i / w) | 0;
     const v = [at(ch[0], f, x, y), at(ch[1], f, x, y), at(ch[2], f, x, y)], l = 0.299 * v[0] + 0.587 * v[1] + 0.114 * v[2];
     for (let k = 0; k < 3; k++) {
-      const col = v[k] * (1 - tint) + Math.min(1, l * 1.8) * hc[k] * tint;   // Nebel nimmt Licht und Dunst-Farbe an
+      const col = v[k] * (1 - tint) + Math.min(1, l * 1.8) * hc[k] * tint;   // fog takes on light and haze colour
       c[k] = Math.min(1, (col * 1.6 + hc[k] * 0.05 * tint) * amt);
     }
   });
 }
 
-// gerichtete Unschärfe mit exponentiellem Abfall entlang (dx, dy) auf einem verkleinerten Feld
+// directional blur with exponential falloff along (dx, dy) on a downsampled field
 function streakBlur(f, dx, dy, len) {
   const { a, w, h } = f, out = new Float32Array(w * h), L = Math.max(1, Math.round(len)), tau = L * 0.35;
   const wts = []; let sum = 0;
@@ -298,15 +298,15 @@ function streakBlur(f, dx, dy, len) {
       if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
       v += a[yy * w + xx] * wts[s + L];
     }
-    out[y * w + x] = v / sum;   // Mittel entlang des Strahls – große helle Flächen werden nicht zu Balken
+    out[y * w + x] = v / sum;   // average along the ray – large bright areas don't turn into bars
   }
   return { a: out, w, h };
 }
-// nur die hellsten Punkte (für Streifen und Sterne)
+// only the brightest points (for streaks and stars)
 function hotSpots(ls, N, lift, w, h, unit, sharp) {
   const R = new Float32Array(N), G = new Float32Array(N), B = new Float32Array(N), lum = new Float32Array(N);
   for (let i = 0; i < N; i++) lum[i] = 0.299 * ls.R[i] + 0.587 * ls.G[i] + 0.114 * ls.B[i];
-  // Umgebung (ca. 3 % der Bildhöhe): kleine, helle Punkte ragen heraus, große Flächen kaum
+  // surroundings (about 3 % of the image height): small bright points stand out, large areas hardly
   const r = Math.max(1, unit * 3), f = Math.max(1, Math.floor(r / 4)), sm = shrink(lum, w, h, f), env = { a: blur2(sm.a, sm.w, sm.h, r / f), w: sm.w, h: sm.h };
   for (let i = 0; i < N; i++) {
     const x = i % w, y = (i / w) | 0, l = lum[i];
@@ -316,7 +316,7 @@ function hotSpots(ls, N, lift, w, h, unit, sharp) {
   }
   return [R, G, B];
 }
-// Anamorphe Lichtstreifen: lang und waagerecht, eingefärbt
+// Anamorphic streaks: long and horizontal, tinted
 function renderStreaks(opts, ls) {
   const g = geometry(opts), p = g.p, { w, h, N } = g;
   if (p.streaks <= 0) return null;
@@ -331,15 +331,15 @@ function renderStreaks(opts, ls) {
     c[0] = Math.min(1, v * (col[0] * 0.8 + 0.2)); c[1] = Math.min(1, v * (col[1] * 0.8 + 0.2)); c[2] = Math.min(1, v * (col[2] * 0.8 + 0.2));
   });
 }
-// Maximum-Filter (quadratisches Fenster, Radius r Zellen), getrennt in x und y
+// maximum filter (square window, radius r cells), separable in x and y
 function maxFilter(f, r) {
   const { a, w, h } = f, t = new Float32Array(w * h), out = new Float32Array(w * h);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let m = 0; for (let k = Math.max(0, x - r); k <= Math.min(w - 1, x + r); k++) m = Math.max(m, a[y * w + k]); t[y * w + x] = m; }
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let m = 0; for (let k = Math.max(0, y - r); k <= Math.min(h - 1, y + r); k++) m = Math.max(m, t[k * w + x]); out[y * w + x] = m; }
   return out;
 }
-// Sternfilter: 4/6/8 Strahlen – nur an einzelnen Lichtpunkten (lokale Helligkeits-Maxima wie Lampen, Glanzlichter),
-// nicht an jeder hellen Kante; sonst würde helle Schrift zu einem Block aus Strahlen.
+// Star filter: 4/6/8 rays – only on single points of light (local brightness maxima like lamps, highlights),
+// not on every bright edge; otherwise bright text would turn into a block of rays.
 function renderStars(opts, ls) {
   const g = geometry(opts), p = g.p, { w, h, N } = g;
   if (p.stars <= 0) return null;
@@ -349,13 +349,13 @@ function renderStars(opts, ls) {
   for (let i = 0; i < N; i++) lum[i] = 0.299 * ls.R[i] + 0.587 * ls.G[i] + 0.114 * ls.B[i];
   const ch = [ls.R, ls.G, ls.B].map((c) => shrink(c, w, h, f)), L = shrink(lum, w, h, f);
   const Lb = { a: blur2(L.a, L.w, L.h, 1.2), w: L.w, h: L.h };
-  // Umgebung (ca. 4 % der Bildhöhe) und Fenster für die Maxima (ca. 2,5 %)
+  // surroundings (about 4 % of the image height) and window for the maxima (about 2.5 %)
   const env = blur2(Lb.a, L.w, L.h, Math.max(2, g.unit * 4 / f)), mx = maxFilter(Lb, Math.max(2, Math.round(g.unit * 2.5 / f)));
   const pts = [new Float32Array(L.a.length), new Float32Array(L.a.length), new Float32Array(L.a.length)];
   for (let j = 0; j < L.a.length; j++) {
     const v = Lb.a[j];
-    if (v < 0.35 || v < mx[j] - 1e-6 || v < env[j] * 1.35) continue;   // nur echte, herausragende Spitzen
-    const k = Math.min(1, (v - env[j]) * 2) * Math.pow(smooth(0.35, 0.95, v), 3);   // die hellsten Punkte dominieren
+    if (v < 0.35 || v < mx[j] - 1e-6 || v < env[j] * 1.35) continue;   // only real, outstanding peaks
+    const k = Math.min(1, (v - env[j]) * 2) * Math.pow(smooth(0.35, 0.95, v), 3);   // the brightest points dominate
     for (let c = 0; c < 3; c++) pts[c][j] = ch[c].a[j] / Math.max(1e-4, L.a[j]) * v * k;
   }
   const acc = pts.map((a) => ({ a: new Float32Array(a.length), w: L.w, h: L.h }));
@@ -369,7 +369,7 @@ function renderStars(opts, ls) {
     for (let k = 0; k < 3; k++) c[k] = Math.min(1, (v[k] * 0.6 + l * 0.4) * amt);
   });
 }
-// Strahl von einzelnen Punkten: Summe entlang der Richtung, hell am Punkt, spitz auslaufend
+// ray from single points: sum along the direction, bright at the point, tapering
 function rayBlur(f, dx, dy, len) {
   const { a, w, h } = f, out = new Float32Array(w * h), L = Math.max(1, Math.round(len));
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -385,21 +385,21 @@ function rayBlur(f, dx, dy, len) {
   return out;
 }
 
-// Ebenen von oben nach unten, wie sie in der Gruppe liegen
+// layers top to bottom, as they lie in the group
 const LAYERS = [
-  { key: "stars", name: "Sterne", mode: () => "linearDodge" },
-  { key: "streaks", name: "Lichtstreifen", mode: () => "linearDodge" },
+  { key: "stars", name: "Stars", mode: () => "linearDodge" },
+  { key: "streaks", name: "Streaks", mode: () => "linearDodge" },
   { key: "halation", name: "Halation", mode: () => "screen" },
   { key: "glow", name: "Glow", mode: (p) => p.glowBlend },
   { key: "diffusion", name: "Diffusion", mode: () => "screen" },
-  { key: "haze", name: "Dunst", mode: () => "screen" },
+  { key: "haze", name: "Haze", mode: () => "screen" },
 ];
 function layerKeys(p) {
   p = sanitize(p);
   const has = { stars: p.stars > 0, streaks: p.streaks > 0, halation: p.halation > 0, glow: p.amount > 0, diffusion: p.diffusion > 0, haze: p.haze > 0 };
   return LAYERS.filter((d) => has[d.key]).map((d) => d.key);
 }
-// eine Ebene berechnen (ls = Lichtquellen, einmal je Bild)
+// compute one layer (ls = light sources, once per image)
 function renderLayer(key, opts, ls) {
   if (key === "glow") return renderGlow(opts, ls);
   if (key === "halation") return renderHalation(opts, ls);
@@ -414,7 +414,7 @@ function render(opts) {
   for (const d of LAYERS) out[d.key] = layerKeys(g.p).indexOf(d.key) >= 0 ? renderLayer(d.key, opts, ls) : null;
   return out;
 }
-// Ebenen wie in Photoshop übereinanderlegen (Vorschau). base: RGB darunter (Uint8, 3 Kanäle)
+// stack the layers like Photoshop does (preview). base: RGB below (Uint8, 3 channels)
 function composite(res, w, h, base) {
   const p = res.params, N = w * h, out = new Uint8Array(N * 3), op = p.opacity / 100;
   const order = LAYERS.slice().reverse().filter((d) => res[d.key]);
@@ -429,7 +429,7 @@ function composite(res, w, h, base) {
   }
   return out;
 }
-// Rand, den die Effekte über ein Objekt hinaus brauchen (in % der Bezugshöhe)
+// margin the effects need beyond an object (in % of the reference height)
 function reachPct(p) {
   p = sanitize(p);
   return Math.max(p.amount > 0 ? p.radius / 100 * 50 : 0, p.halation > 0 ? p.halationRadius / 100 * 12 : 0, p.diffusion > 0 ? p.diffusionRadius / 100 * 16 : 0,

@@ -1,4 +1,4 @@
-// Erzeugt die Plugin-Icons: eine Lichtquelle mit Schein und vier Strahlen.
+// Creates the plugin icons: a light source with a halo and four rays.
 const fs = require("fs"), path = require("path");
 const { encodePNG } = require("./png.js");
 const dir = path.join(__dirname, "..", "glow", "icons");
@@ -17,4 +17,4 @@ function icon(size, file) {
   fs.writeFileSync(path.join(dir, file), encodePNG(size, size, rgba, 4));
 }
 icon(23, "icon@1x.png"); icon(46, "icon@2x.png"); icon(48, "plugin@1x.png"); icon(96, "plugin@2x.png");
-console.log("Icons geschrieben:", fs.readdirSync(dir).join(", "));
+console.log("icons written:", fs.readdirSync(dir).join(", "));

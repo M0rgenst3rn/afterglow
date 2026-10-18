@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <link rel="stylesheet" href="ms-ui.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,29 +15,29 @@
 
     <div id="previewBox" class="preview">
       <img id="preview" class="hidden">
-      <div id="previewMsg" class="preview-msg">Dokument öffnen…</div>
+      <div id="previewMsg" class="preview-msg">Open a document…</div>
       <div class="preview-tools">
         <div class="seg mini" id="previewModeSeg">
-          <div class="seg-btn active" data-mode="fit" title="Ganzes Bild">Ganz</div>
-          <div class="seg-btn" data-mode="detail" title="Ausschnitt in Originalgröße">1:1</div>
+          <div class="seg-btn active" data-mode="fit" title="Whole image">Fit</div>
+          <div class="seg-btn" data-mode="detail" title="Detail at original size">1:1</div>
         </div>
-        <div class="switch small" data-for="previewOriginal" data-kind="small" title="Vorschau ohne Effekt"><span class="knob"></span><span class="sw-label">Vorher</span></div>
+        <div class="switch small" data-for="previewOriginal" data-kind="small" title="Preview without the effect"><span class="knob"></span><span class="sw-label">Before</span></div>
         <input type="checkbox" id="previewOriginal" class="hidden">
       </div>
     </div>
 
     <div class="seg target" id="targetSeg">
-      <div class="seg-btn" data-target="document">Ganzes Dokument</div>
-      <div class="seg-btn" data-target="layers">Nur Ebene</div>
+      <div class="seg-btn" data-target="document">Whole document</div>
+      <div class="seg-btn" data-target="layers">Layer only</div>
     </div>
     <div id="targetInfo" class="target-info"></div>
 
     <div id="secStrengthTop" class="strength"></div>
     <div class="actions">
-      <div class="btn primary" id="apply">Anwenden</div>
-      <div class="switch" data-for="liveCanvas" title="Änderungen sofort im Dokument zeigen"><span class="knob"></span><span class="sw-label">Live</span></div>
+      <div class="btn primary" id="apply">Apply</div>
+      <div class="switch" data-for="liveCanvas" title="Show changes in the document right away"><span class="knob"></span><span class="sw-label">Live</span></div>
       <input type="checkbox" id="liveCanvas" class="hidden">
-      <div class="btn ghost" id="remove" title="Effekt aus dem Dokument entfernen">Entfernen</div>
+      <div class="btn ghost" id="remove" title="Remove the effect from the document">Remove</div>
     </div>
     <div id="status" class="status"></div>
   </div>
@@ -54,53 +55,53 @@
       <div class="sec-body">
         <div id="secGlowMain"></div>
         <div class="field">
-          <span class="field-label">Farbe</span>
+          <span class="field-label">Colour</span>
           <div class="seg grow" id="colorSeg">
-            <div class="seg-btn" data-color="original">Vom Licht</div>
-            <div class="seg-btn" data-color="tint">Eigene</div>
+            <div class="seg-btn" data-color="original">From light</div>
+            <div class="seg-btn" data-color="tint">Custom</div>
           </div>
-          <div id="tintRow" class="swatch-wrap"><div id="swatch-tint" class="swatch" title="Farbe wählen"></div><span id="hexl-tint" class="hex-label"></span></div>
+          <div id="tintRow" class="swatch-wrap"><div id="swatch-tint" class="swatch" title="Choose colour"></div><span id="hexl-tint" class="hex-label"></span></div>
         </div>
       </div>
     </div>
 
     <div class="sec" data-sec="effects">
-      <div class="sec-head"><span class="sec-title">Effekte</span><span class="sec-meta">0 % ist aus</span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-head"><span class="sec-title">Effects</span><span class="sec-meta">0 % is off</span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="secHalation"></div>
         <div id="secDiffusion"></div>
         <div id="secHaze"></div>
-        <div id="hazeColorRow" class="row sub"><span class="field-label">Farbe</span><div id="swatch-hazeColor" class="swatch"></div><span id="hexl-hazeColor" class="hex-label"></span></div>
+        <div id="hazeColorRow" class="row sub"><span class="field-label">Colour</span><div id="swatch-hazeColor" class="swatch"></div><span id="hexl-hazeColor" class="hex-label"></span></div>
         <div id="secStreaks"></div>
-        <div id="streakColorRow" class="row sub"><span class="field-label">Farbe</span><div id="swatch-streakColor" class="swatch"></div><span id="hexl-streakColor" class="hex-label"></span></div>
+        <div id="streakColorRow" class="row sub"><span class="field-label">Colour</span><div id="swatch-streakColor" class="swatch"></div><span id="hexl-streakColor" class="hex-label"></span></div>
         <div id="secStars"></div>
-        <div id="starRaysRow" class="row sub"><span class="field-label">Strahlen</span><div class="seg grow" id="raysSeg"></div></div>
+        <div id="starRaysRow" class="row sub"><span class="field-label">Rays</span><div class="seg grow" id="raysSeg"></div></div>
       </div>
     </div>
 
     <div class="sec" data-sec="fine">
-      <div class="sec-head"><span class="sec-title">Feintuning</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-head"><span class="sec-title">Fine-tuning</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="secFine"></div>
-        <div class="field"><span class="field-label">Glow-Art</span><div class="seg grow" id="blendSeg"></div></div>
+        <div class="field"><span class="field-label">Glow type</span><div class="seg grow" id="blendSeg"></div></div>
       </div>
     </div>
 
     <div class="sec" data-sec="more">
-      <div class="sec-head"><span class="sec-title">Eigene Presets &amp; Werkzeuge</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-head"><span class="sec-title">Presets &amp; tools</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="presetList" class="preset-list"></div>
         <div class="row">
-          <input type="text" id="presetName" class="grow" placeholder="Name für dieses Preset">
-          <div class="btn small" id="presetSave">Speichern</div>
+          <input type="text" id="presetName" class="grow" placeholder="Name for this preset">
+          <div class="btn small" id="presetSave">Save</div>
         </div>
         <div class="row tools-row">
-          <div class="btn small ghost" id="resetAll">Zurücksetzen</div>
-          <div class="btn small ghost" id="verify" title="Vergleicht das Ergebnis im Dokument mit den Einstellungen">Prüfen</div>
-          <div class="btn small ghost" id="selfTest" title="Legt ein Testdokument an und prüft alle Funktionen">Selbsttest</div>
-          <div class="btn small ghost" id="refreshPreview" title="Vorschau neu laden">Vorschau neu</div>
+          <div class="btn small ghost" id="resetAll">Reset</div>
+          <div class="btn small ghost" id="verify" title="Compares the result in the document with the settings">Verify</div>
+          <div class="btn small ghost" id="selfTest" title="Creates a test document and checks every function">Self-test</div>
+          <div class="btn small ghost" id="refreshPreview" title="Reload the preview">Refresh preview</div>
         </div>
-        <div class="hint">MS Glow legt eine Gruppe mit echten Ebenen an. Sie hellen nur auf, dein Original bleibt unverändert. Bei „Nur Ebene“ liegt das Original in der Gruppe; Entfernen stellt es wieder her.</div>
+        <div class="hint">Morgenstern Glow creates a group with real layers. They only brighten, your original stays untouched. With "Layer only" the original sits inside the group; Remove restores it.</div>
       </div>
     </div>
 

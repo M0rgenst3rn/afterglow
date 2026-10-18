@@ -1,6 +1,6 @@
-// Erzeugt die Bilder der README mit der echten Engine: eine Chrome-Schrift (MS Render, Ordner daneben)
-// als eigene Ebene, darauf Morgenstern Glow im Ebenen-Modus – so, wie man das Tool in Photoshop benutzt.
-// node tools/make-showcase.js   (braucht Python mit Pillow für Schrift und Beschriftung)
+// Builds the README images with the real engine: chrome lettering (Morgenstern Render, folder next to this one)
+// as its own layer, with Morgenstern Glow on top in layer mode – the way the tool is used in Photoshop.
+// node tools/make-showcase.js   (needs Python with Pillow for the lettering and labels)
 const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
 const Core = require(path.join(__dirname, "..", "glow", "core.js"));
 const { encodePNG } = require("./png.js");
@@ -34,7 +34,7 @@ im.save(s["out"])
 `, js]);
 }
 
-// der Morgenstern-Look: tiefblaues Licht hinter Chrome
+// the Morgenstern look: deep blue light behind chrome
 const SIGNATURE = Object.assign(Core.presetParams("chromeaura"), {
   amount: 200, radius: 100, falloff: 0, gamma: 50, tint: "#3d6bff",
   haze: 50, hazeRadius: 100, hazeColor: "#2f5bff", hazeTint: 100, diffusion: 20,
@@ -42,40 +42,40 @@ const SIGNATURE = Object.assign(Core.presetParams("chromeaura"), {
 const W = 960, H = 405;
 const sc = chromeScene({ lines: ["GLOW"], W, H, px: 320, fill: 0.62 });
 
-// 1) Titelbild
+// 1) hero
 {
   const big = chromeScene({ lines: ["GLOW"], W: 1800, H: 760, px: 420, fill: 0.62 });
   fs.writeFileSync(path.join(OUT, "hero.png"), encodePNG(big.W, big.H, glow(big, SIGNATURE), 3));
 }
-// 2) Vorher / Nachher
-sheet("vorher-nachher.png", "", [
-  { img: save("orig", sc.base, W, H), label: "Vorher", sub: "Chrome aus MS Render" },
-  { img: save("after-sig", glow(sc, SIGNATURE), W, H), label: "Nachher", sub: "blaues Licht dahinter" },
+// 2) before / after
+sheet("before-after.png", "", [
+  { img: save("orig", sc.base, W, H), label: "Before", sub: "chrome from Morgenstern Render" },
+  { img: save("after-sig", glow(sc, SIGNATURE), W, H), label: "After", sub: "blue light behind it" },
 ], 2, 840, 354);
-// 3) alle Looks
-sheet("looks.png", Core.PRESETS.length + " Looks", Core.PRESETS.map((pr) => ({ img: save("look-" + pr.id, glow(sc, Core.presetParams(pr.id)), W, H), label: pr.name })), 3, 560, 236);
-// 4) die Effekte einzeln
+// 3) all looks
+sheet("looks.png", Core.PRESETS.length + " looks", Core.PRESETS.map((pr) => ({ img: save("look-" + pr.id, glow(sc, Core.presetParams(pr.id)), W, H), label: pr.name })), 3, 560, 236);
+// 4) the effects one by one
 const only = { amount: 0, halation: 0, diffusion: 0, streaks: 0, stars: 0, haze: 0 };
 const blue = { colorMode: "tint", tint: "#3d6bff" };
-sheet("effekte.png", "Die Effekte einzeln", [
-  { label: "Glow", sub: "physikalischer Abfall", p: Object.assign({}, Core.DEFAULTS, only, blue, { amount: 180, radius: 70 }) },
-  { label: "Halation", sub: "Lichtsaum wie bei Film", p: Object.assign({}, Core.DEFAULTS, only, { halation: 100 }) },
+sheet("effects.png", "The effects one by one", [
+  { label: "Glow", sub: "physical falloff", p: Object.assign({}, Core.DEFAULTS, only, blue, { amount: 180, radius: 70 }) },
+  { label: "Halation", sub: "light fringe like film", p: Object.assign({}, Core.DEFAULTS, only, { halation: 100 }) },
   { label: "Diffusion", sub: "Pro-Mist", p: Object.assign({}, Core.DEFAULTS, only, { diffusion: 90 }) },
-  { label: "Dunst", sub: "Nebel in der Luft", p: Object.assign({}, Core.DEFAULTS, only, { haze: 90, hazeRadius: 90, hazeColor: "#2f5bff", hazeTint: 90 }) },
-  { label: "Lichtstreifen", sub: "anamorph", p: Object.assign({}, Core.DEFAULTS, only, { streaks: 100, streakLength: 80 }) },
-  { label: "Sterne", sub: "Sternfilter, 6 Strahlen", p: Object.assign({}, Core.DEFAULTS, only, { stars: 100, starRays: 6, starLength: 100, threshold: 30 }) },
-  { label: "Prisma", sub: "Farbsäume", p: Object.assign({}, Core.DEFAULTS, { prism: 100, amount: 180, radius: 60, saturation: 40 }) },
-  { label: "Nur außen", sub: "Chrome bleibt Chrome", p: Object.assign({}, SIGNATURE, { haze: 0, diffusion: 0 }) },
-  { label: "Eigene Farbe", sub: "Mondlicht", p: Core.presetParams("moon") },
+  { label: "Haze", sub: "fog in the air", p: Object.assign({}, Core.DEFAULTS, only, { haze: 90, hazeRadius: 90, hazeColor: "#2f5bff", hazeTint: 90 }) },
+  { label: "Streaks", sub: "anamorphic", p: Object.assign({}, Core.DEFAULTS, only, { streaks: 100, streakLength: 80 }) },
+  { label: "Stars", sub: "star filter, 6 rays", p: Object.assign({}, Core.DEFAULTS, only, { stars: 100, starRays: 6, starLength: 100, threshold: 30 }) },
+  { label: "Prism", sub: "colour fringes", p: Object.assign({}, Core.DEFAULTS, { prism: 100, amount: 180, radius: 60, saturation: 40 }) },
+  { label: "Outside only", sub: "chrome stays chrome", p: Object.assign({}, SIGNATURE, { haze: 0, diffusion: 0 }) },
+  { label: "Custom colour", sub: "Moonlight", p: Core.presetParams("moon") },
 ].map((t, n) => ({ img: save("fx-" + n, glow(sc, t.p), W, H), label: t.label, sub: t.sub })), 3, 560, 236);
-// 5) Abfall
-sheet("abfall.png", "Abfall: weit, mittel, eng", [0, 50, 100].map((f) => ({
+// 5) falloff
+sheet("falloff.png", "Falloff: wide, medium, tight", [0, 50, 100].map((f) => ({
   img: save("fall-" + f, glow(sc, Object.assign({}, Core.DEFAULTS, blue, { falloff: f, amount: 180, radius: 80 })), W, H),
-  label: `Abfall ${f} %`, sub: f === 0 ? "weiter, flacher Schein" : f === 100 ? "eng um die Schrift" : "",
+  label: `Falloff ${f} %`, sub: f === 0 ? "wide, flat glow" : f === 100 ? "tight around the lettering" : "",
 })), 3, 560, 236);
-// 6) Nur außen: Glow über allem vs. nur drumherum
+// 6) outside only: glow over everything vs. only around it
 sheet("aura.png", "", [
-  { img: save("aura-all", glow(sc, Object.assign({}, SIGNATURE, { outer: 0, haze: 0, diffusion: 0 })), W, H), label: "Glow über allem", sub: "auch die Schrift leuchtet" },
-  { img: save("aura-out", glow(sc, Object.assign({}, SIGNATURE, { haze: 0, diffusion: 0 })), W, H), label: "Nur außen", sub: "Chrome bleibt Chrome" },
+  { img: save("aura-all", glow(sc, Object.assign({}, SIGNATURE, { outer: 0, haze: 0, diffusion: 0 })), W, H), label: "Glow over everything", sub: "the lettering glows too" },
+  { img: save("aura-out", glow(sc, Object.assign({}, SIGNATURE, { haze: 0, diffusion: 0 })), W, H), label: "Outside only", sub: "chrome stays chrome" },
 ], 2, 840, 354);
-console.log("Bilder geschrieben:", fs.readdirSync(OUT).join(", "));
+console.log("images written:", fs.readdirSync(OUT).join(", "));
