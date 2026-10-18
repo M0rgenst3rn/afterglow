@@ -94,7 +94,7 @@ html, body {
 .sl-num:hover { border-color: #1e2740; }
 .sl-num:focus { border-color: #2f5bff; background-color: #0d1220; }
 .sl-unit { width: 12px; color: #7e89a6; font-size: 10px; padding-left: 2px; }
-.sl-track { position: relative; height: 14px; cursor: pointer; }
+.sl-track { position: relative; height: 14px; margin: 0 5px; cursor: pointer; }
 .sl-rail { position: absolute; left: 0; right: 0; top: 6px; height: 2px; border-radius: 1px; background-color: #1e2740; }
 .sl-fill { position: absolute; top: 6px; height: 2px; border-radius: 1px; background-color: #2f5bff; box-shadow: 0 0 8px rgba(47, 91, 255, 0.8); }
 .sl-thumb { position: absolute; top: 2px; width: 10px; height: 10px; margin-left: -5px; border-radius: 5px; background-color: #e6ebf7; border: 1px solid #7b9cff; }
