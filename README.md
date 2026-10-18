@@ -25,19 +25,18 @@ aufhellt. Das Original bleibt unverändert.
 ### Highlights
 
 - **Ganzes Dokument oder einzelne Ebenen**: Beides ist nicht-destruktiv und lässt sich jederzeit entfernen
-- **Glow mit echtem Lichtabfall**: Stärke, Radius, Abfall, Kern schützen, Sättigung, Gamma und Farbe
+- **Glow mit echtem Lichtabfall**: Stärke, Radius, Schwelle und Farbe, im Feintuning Abfall, Kern schützen, Sättigung, Gamma und Prisma
 - **6 Effekte als eigene Ebenen**: Glow, Halation, Diffusion, Dunst, Lichtstreifen und Sterne
 - **Nur außen leuchten**: Das Objekt bleibt unverfärbt, der Schein liegt nur drumherum, z. B. eine Aura um Chrome-Schrift
-- **Nur ein Farbbereich**: z. B. nur Pink oder nur Gelb leuchten lassen
-- **Prisma**: Farbsäume wie bei einer echten Linse
-- **18 Looks** mit Vorschaubildern deines eigenen Motivs
+- **Aufgeräumtes Panel**: aufklappbare Bereiche, eigene Farbpalette, das Wichtigste oben, alles Weitere im Feintuning
+- **17 Looks** mit Vorschaubildern deines eigenen Motivs
 - **Vorschau** des ganzen Bilds oder als Detail in 1:1, dazu **Live** im Dokument
 - **Einstellungen in der Gruppe**: Gruppe auswählen, und das Panel lädt ihre Werte wieder
 - **Selbsttest**: 47 Prüfungen gegen das echte Photoshop-Ergebnis
 
-## 18 Looks
+## 17 Looks
 
-<p align="center"><img src="docs/images/looks.png" alt="Alle 18 Looks"></p>
+<p align="center"><img src="docs/images/looks.png" alt="Alle 17 Looks"></p>
 
 Ein Klick auf einen Look setzt alle Regler. Danach bleibt jeder Wert frei einstellbar. Die Vorschaubilder im
 Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
@@ -48,7 +47,7 @@ Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
 
 Mit **Nur außen** bleibt das Objekt selbst unverändert, und das Leuchten liegt nur drumherum. Im Beispiel ist das
 eine Chrome-Schrift aus [MS Render](https://github.com/M0rgenst3rn/ms-render) mit dem Look **Chrome-Aura**: Das
-Silber bleibt silbern, der Schein ist blau-violett. Bei „Nur ausgewählte Ebene“ nimmt MS Glow genau die Form der
+Silber bleibt silbern, der Schein ist blau-violett. Bei „Nur Ebene“ nimmt MS Glow genau die Form der
 Ebene, im ganzen Dokument alles, was sich deutlich vom dunklen Hintergrund abhebt.
 
 ## Die Effekte
@@ -76,19 +75,21 @@ großen ein enger Hof um die Lichtquelle. So verhält sich das Leuchten wie echt
 
 | Bereich | Regler | Was er macht |
 |---|---|---|
-| Oben | **Gesamt-Deckkraft** | Stärke des ganzen Looks |
-| Lichtquellen | **Schwelle / Übergang / Gamma** | Ab welcher Helligkeit es leuchtet, wie weich der Übergang ist, und ob auch Mitteltöne (Gamma unter 100 %) oder nur die hellsten Stellen leuchten |
-| Lichtquellen | **Nur diese Farbe / Farbbereich** | Nur Farben nahe der gewählten leuchten, 0 % heißt alle |
-| Glow | **Stärke / Radius / Abfall** | Helligkeit, Reichweite und Verlauf des Leuchtens |
-| Glow | **Kern schützen** | Helle Flächen behalten ihre Zeichnung statt weiß zu werden |
+| Oben | **Deckkraft** | Stärke des ganzen Looks |
+| Glow | **Stärke / Radius / Schwelle** | Helligkeit und Reichweite des Leuchtens, ab welcher Helligkeit etwas leuchtet |
 | Glow | **Nur außen** | Im Objekt selbst kein Glow, der Schein liegt nur drumherum |
-| Glow | **Sättigung / Prisma** | Farbigkeit des Leuchtens, Farbsäume (Rot reicht weiter als Blau) |
-| Glow | **Farbe des Lichts oder eigene Farbe / Mischmodus** | Leuchten in der Farbe der Quelle oder einer eigenen, als Negativ multiplizieren oder Linear abwedeln |
-| Film & Linse | **Halation / Radius / Farbe** | Lichtsaum um helle Kanten |
-| Film & Linse | **Diffusion / Radius** | Pro-Mist-Weichzeichner |
-| Film & Linse | **Lichtstreifen / Länge / Farbe** | Anamorphe Streifen |
-| Film & Linse | **Sterne / Strahlen-Länge / Drehung / Strahlen** | Sternfilter |
-| Dunst | **Dunst / Dunst-Weite / Färbung / Dunst-Farbe** | Nebel in der Luft, z. B. türkis wie in einer nebligen Stadt |
+| Glow | **Farbe: Vom Licht oder Eigene** | Leuchten in der Farbe der Quelle oder einer eigenen aus der Palette |
+| Effekte | **Halation** | Lichtsaum um helle Kanten |
+| Effekte | **Diffusion** | Pro-Mist-Weichzeichner |
+| Effekte | **Dunst / Dunst-Weite / Farbe** | Nebel in der Luft, z. B. türkis wie in einer nebligen Stadt |
+| Effekte | **Lichtstreifen / Länge / Farbe** | Anamorphe Streifen |
+| Effekte | **Sterne / Länge / Strahlen** | Sternfilter mit 4, 6 oder 8 Strahlen |
+| Feintuning | **Abfall / Kern schützen** | Verlauf des Leuchtens; helle Flächen behalten ihre Zeichnung |
+| Feintuning | **Sättigung / Gamma / Prisma** | Farbigkeit, ob auch Mitteltöne leuchten, Farbsäume (Rot reicht weiter als Blau) |
+| Feintuning | **Glow-Art: Weich oder Kräftig** | Negativ multiplizieren oder Linear abwedeln |
+
+Die Unter-Regler eines Effekts erscheinen erst, wenn der Effekt eingeschaltet ist. Ein Doppelklick auf einen
+Regler setzt ihn zurück.
 
 Alle Größen beziehen sich auf die Bildhöhe. Der Look sieht deshalb bei jeder Dokumentgröße gleich aus, und
 die kleine Vorschau zeigt dasselbe wie das Ergebnis.
@@ -107,7 +108,7 @@ MS Glow           (Gruppe, Gesamt-Deckkraft)
 ```
 Es entstehen nur die Ebenen der Effekte, die du eingeschaltet hast.
 
-**Nur ausgewählte Ebene**: Jede Ebene kommt in eine eigene Gruppe **„MS Glow · Name“**. Das Original liegt
+**Nur Ebene**: Jede Ebene kommt in eine eigene Gruppe **„MS Glow · Name“**. Das Original liegt
 unverändert darin, die Effekt-Ebenen darüber. Das Leuchten darf über das Objekt hinausstrahlen. Ebenenmasken
 freigestellter Objekte werden berücksichtigt: Was die Maske verdeckt, leuchtet nicht. **Entfernen** stellt das
 Original an derselben Stelle wieder her.
@@ -131,10 +132,10 @@ Original an derselben Stelle wieder her.
 
 ## So benutzt du es
 
-1. **Ziel wählen**: unter der Vorschau **Ganzes Dokument** oder **Nur ausgewählte Ebene**. Darunter steht, was gerade bearbeitet wird
+1. **Ziel wählen**: unter der Vorschau **Ganzes Dokument** oder **Nur Ebene**. Darunter steht, was gerade bearbeitet wird
 2. **Look anklicken**: Die Vorschau zeigt das Ergebnis sofort
 3. **Feinschliff**: Mit **Schwelle** bestimmst du, was leuchtet, mit **Stärke**, **Radius** und **Abfall**, wie es leuchtet
-4. **Look anwenden** klicken oder **Live** einschalten
+4. **Anwenden** klicken oder **Live** einschalten
 5. **Später ändern**: Gruppe auswählen, Werte anpassen, erneut anwenden. Das Panel lädt die Einstellungen der Gruppe
 6. **Entfernen** löscht den Look wieder. Bei Ebenen bleibt das Original unverändert stehen
 

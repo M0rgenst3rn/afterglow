@@ -272,30 +272,73 @@ function downsample(src, sw, sh, ox, oy, w, h, ps) {
   return out;
 }
 
-// ---------------------------------------------------------------- UI aufbauen
-function buildSliders() {
-  for (const s of SLIDERS) {
-    const row = document.createElement("div");
-    row.className = "ctl";
-    if (s.tip) row.title = s.tip;
-    row.innerHTML = `<span class="ctl-label">${s.label}</span><sp-slider class="ctl-range" min="${s.min}" max="${s.max}" step="${s.step}"></sp-slider><input class="ctl-num" type="text"><span class="ctl-unit">${s.unit}</span>`;
-    $(s.parent).appendChild(row);
-    const range = row.querySelector(".ctl-range"), num = row.querySelector(".ctl-num");
-    ctl[s.key] = { range, num, row, def: s };
-    const onRange = () => { params[s.key] = Number(range.value); num.value = String(params[s.key]); activeLook = null; changed(); };
-    range.addEventListener("input", onRange);
-    range.addEventListener("change", onRange);
-    num.addEventListener("change", () => {
-      let v = parseFloat(String(num.value).replace(",", "."));
-      if (isNaN(v)) v = params[s.key];
-      params[s.key] = Math.max(s.min, Math.min(s.max, v));
-      activeLook = null; syncUI(); changed();
-    });
-  }
+// ---------------------------------------------------------------- Eigene Bedienelemente
+// Bewusst keine Photoshop-Bausteine (sp-slider, native Checkboxen/Selects, Photoshop-Farbwähler):
+// eigene Regler, Schalter, Segmente und ein Farb-Popover im Morgenstern-Design.
+
+// Regler: Name und Wert oben, darunter eine schmale Spur mit leuchtender Füllung.
+// Ziehen, Klick auf die Spur, Pfeiltasten (Umschalt = ×10), Doppelklick = Standardwert, Wert direkt eintippen.
+function makeSlider(s) {
+  const row = document.createElement("div");
+  row.className = "sl";
+  if (s.tip) row.title = s.tip;
+  row.innerHTML = `<div class="sl-head"><span class="sl-label">${s.label}</span><span class="sl-val"><input class="sl-num" type="text"><span class="sl-unit">${s.unit}</span></span></div>` +
+    `<div class="sl-track" tabindex="0"><div class="sl-rail"></div><div class="sl-fill"></div><div class="sl-thumb"></div></div>`;
+  $(s.parent).appendChild(row);
+  const track = row.querySelector(".sl-track"), fill = row.querySelector(".sl-fill"), thumb = row.querySelector(".sl-thumb"), num = row.querySelector(".sl-num");
+  const span = s.max - s.min, zero = Math.max(s.min, Math.min(s.max, 0));
+  const snap = (v) => { v = Math.round((v - s.min) / s.step) * s.step + s.min; return Math.max(s.min, Math.min(s.max, +v.toFixed(4))); };
+  const show = (v) => {
+    const t = (v - s.min) / span, z = (zero - s.min) / span;
+    fill.style.left = (Math.min(t, z) * 100) + "%";
+    fill.style.width = (Math.abs(t - z) * 100) + "%";
+    thumb.style.left = (t * 100) + "%";
+    if (document.activeElement !== num) num.value = String(v);
+  };
+  const commit = (v) => { v = snap(v); if (params[s.key] === v) return; params[s.key] = v; show(v); activeLook = null; changed(); };
+  const fromX = (clientX) => { const r = track.getBoundingClientRect(); return s.min + Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width))) * span; };
+  let drag = false;
+  const move = (e) => { if (drag) commit(fromX(e.clientX)); };
+  const up = () => { if (!drag) return; drag = false; row.className = row.className.replace(" dragging", ""); syncUI(); };
+  track.addEventListener("mousedown", (e) => { drag = true; row.className += " dragging"; commit(fromX(e.clientX)); });
+  document.addEventListener("mousemove", move);
+  document.addEventListener("mouseup", up);
+  track.addEventListener("dblclick", () => { commit(Core.DEFAULTS[s.key] !== undefined ? Core.DEFAULTS[s.key] : s.min); syncUI(); });
+  track.addEventListener("keydown", (e) => {
+    const k = e.key, st = s.step * (e.shiftKey ? 10 : 1);
+    if (k === "ArrowRight" || k === "ArrowUp") { commit(params[s.key] + st); syncUI(); e.preventDefault(); }
+    else if (k === "ArrowLeft" || k === "ArrowDown") { commit(params[s.key] - st); syncUI(); e.preventDefault(); }
+  });
+  num.addEventListener("change", () => {
+    let v = parseFloat(String(num.value).replace(",", "."));
+    if (isNaN(v)) v = params[s.key];
+    commit(v); syncUI();
+  });
+  ctl[s.key] = { row, def: s, set: show };
 }
+function buildSliders() { for (const s of SLIDERS) makeSlider(s); }
+
+// Schalter, die ein (verstecktes) Kontrollkästchen steuern – so bleibt „.checked“ für die Logik erhalten
+function bindSwitch(id) {
+  const input = $(id), sw = document.querySelector(`.switch[data-for="${id}"]`);
+  sw.addEventListener("click", () => { input.checked = !input.checked; input.dispatchEvent(new Event("change")); syncSwitches(); });
+}
+function syncSwitches() {
+  document.querySelectorAll(".switch").forEach((sw) => {
+    const on = $(sw.dataset.for).checked;
+    sw.className = "switch" + (on ? " on" : "") + (sw.dataset.kind ? " " + sw.dataset.kind : "");
+  });
+}
+// Segment-Schalter für eine Auswahl (ersetzt Ausklapplisten)
+function buildSeg(id, options, key, toValue) {
+  $(id).innerHTML = options.map((o) => `<div class="seg-btn" data-v="${o.id}">${o.name}</div>`).join("");
+  $(id).querySelectorAll(".seg-btn").forEach((el) => el.addEventListener("click", () => { params[key] = toValue ? toValue(el.dataset.v) : el.dataset.v; activeLook = null; syncUI(); changed(); }));
+}
+function syncSeg(id, value) { $(id).querySelectorAll(".seg-btn").forEach((el) => { el.className = el.dataset.v === String(value) ? "seg-btn active" : "seg-btn"; }); }
+
 function buildStatic() {
-  $("glowBlend").innerHTML = Core.BLENDS.map((b) => `<option value="${b.id}">${b.name}</option>`).join("");
-  $("starRays").innerHTML = Core.RAYS.map((n) => `<option value="${n}">${n} Strahlen</option>`).join("");
+  buildSeg("blendSeg", Core.BLENDS.map((b) => ({ id: b.id, name: b.id === "screen" ? "Weich" : "Kräftig" })), "glowBlend");
+  buildSeg("raysSeg", Core.RAYS.map((n) => ({ id: String(n), name: String(n) })), "starRays", Number);
   const grid = $("lookGrid");
   grid.innerHTML = "";
   for (const pr of Core.PRESETS) {
@@ -309,12 +352,16 @@ function buildStatic() {
   }
   rebuildPresetSelect();
 }
+// eigene Presets als Liste: Klick lädt, × löscht
 function rebuildPresetSelect() {
-  const user = loadUserPresets();
-  let html = `<option value="">– Eigenes Preset laden –</option>`;
-  for (const n of Object.keys(user)) html += `<option value="${n}">★ ${n}</option>`;
-  $("presetSelect").innerHTML = html;
-  $("presetSelect").value = "";
+  const user = loadUserPresets(), names = Object.keys(user), box = $("presetList");
+  box.innerHTML = names.length ? names.map((n) => `<div class="preset" data-n="${esc(n)}"><span class="preset-name">${esc(n)}</span><span class="preset-del" title="Löschen">×</span></div>`).join("")
+    : `<div class="empty">Noch keine eigenen Presets – stell einen Look ein und speichere ihn.</div>`;
+  box.querySelectorAll(".preset").forEach((el) => {
+    const n = el.dataset.n;
+    el.querySelector(".preset-name").addEventListener("click", () => { params = Core.sanitize(loadUserPresets()[n]); activeLook = null; syncUI(); changed(); setStatus(`Preset „${n}“ geladen.`); });
+    el.querySelector(".preset-del").addEventListener("click", () => { const u = loadUserPresets(); delete u[n]; saveUserPresets(u); rebuildPresetSelect(); setStatus(`Preset „${n}“ gelöscht.`); });
+  });
 }
 function applyLook(id) {
   const pr = Core.presetParams(id);
@@ -325,26 +372,53 @@ function applyLook(id) {
   setStatus(`Look „${Core.PRESETS.find((x) => x.id === id).name}“ – alle Regler bleiben frei einstellbar.`);
 }
 
-// Farbfelder: [Element-ID, Parameter]
+// Farben: eigenes Popover mit abgestimmten Farben und Hex-Eingabe; Photoshops Farbwähler nur auf Wunsch
 const COLOR_FIELDS = [["tint", "tint"], ["streakColor", "streakColor"], ["hazeColor", "hazeColor"]];
+const PALETTE = ["#ffffff", "#ffe9c7", "#ffcf9a", "#ffb060", "#ff8a3d", "#ff5a2a", "#ff3f6e", "#ff3fa4",
+  "#d24dff", "#9a5cff", "#6a5cff", "#3d6bff", "#2a8cff", "#3fd4ff", "#2fe0c8", "#2fb8b0",
+  "#39ff7a", "#a6ff4d", "#ffe14d", "#9cc4ff", "#c8d8ff", "#7a86a3"];
+let popKey = null;
+function openColorPop(key, anchor) {
+  const pop = $("colorPop");
+  if (popKey === key && pop.className.indexOf("hidden") < 0) return closeColorPop();
+  popKey = key;
+  pop.innerHTML = `<div class="pal">${PALETTE.map((c) => `<div class="pal-c${c === params[key] ? " on" : ""}" data-c="${c}" style="background-color:${c}"></div>`).join("")}</div>` +
+    `<div class="pop-row"><input type="text" class="hex" id="popHex" maxlength="7" value="${params[key]}"><div class="btn small ghost" id="popExact">Exakt wählen…</div><div class="btn small" id="popDone">Fertig</div></div>`;
+  anchor.parentNode.insertBefore(pop, anchor.nextSibling);
+  pop.className = "color-pop";
+  const set = (c) => { params[key] = c; activeLook = null; syncUI(); changed(); pop.querySelectorAll(".pal-c").forEach((el) => { el.className = el.dataset.c === c ? "pal-c on" : "pal-c"; }); $("popHex").value = c; };
+  pop.querySelectorAll(".pal-c").forEach((el) => el.addEventListener("click", () => set(el.dataset.c)));
+  $("popHex").addEventListener("change", (e) => { let v = String(e.target.value).trim(); if (v[0] !== "#") v = "#" + v; if (/^#[0-9a-f]{6}$/i.test(v)) set(v.toLowerCase()); });
+  $("popExact").addEventListener("click", () => pickColor(key));
+  $("popDone").addEventListener("click", closeColorPop);
+}
+// Das Popover erscheint unter der ganzen Zeile des Farbfelds, nicht in ihr
+function popAnchor(id) {
+  let el = $("swatch-" + id);
+  while (el && !/\b(field|row)\b/.test(el.className)) el = el.parentNode;
+  return el;
+}
+function closeColorPop() { popKey = null; $("colorPop").className = "color-pop hidden"; }
+
 function syncUI() {
   for (const key of Object.keys(ctl)) {
     const c = ctl[key];
-    c.range.value = String(params[key]); c.num.value = String(params[key]);
-    c.row.className = "ctl" + (c.def.sub ? " sub" : "") + (c.def.show && !c.def.show(params) ? " hidden" : "");
+    c.set(params[key]);
+    c.row.className = "sl" + (c.def.sub ? " sub" : "") + (c.def.show && !c.def.show(params) ? " hidden" : "");
   }
   document.querySelectorAll("#colorSeg .seg-btn").forEach((el) => { el.className = el.dataset.color === params.colorMode ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll("#targetSeg .seg-btn").forEach((el) => { el.className = el.dataset.target === target ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll("#previewModeSeg .seg-btn").forEach((el) => { el.className = el.dataset.mode === previewMode ? "seg-btn active" : "seg-btn"; });
   document.querySelectorAll(".look").forEach((el) => { el.className = el.dataset.id === activeLook ? "look active" : "look"; });
-  $("lookName").textContent = activeLook ? "· " + Core.PRESETS.find((x) => x.id === activeLook).name : "";
+  $("lookName").textContent = activeLook ? Core.PRESETS.find((x) => x.id === activeLook).name : "";
   $("tintRow").className = params.colorMode === "tint" ? "swatch-wrap" : "swatch-wrap hidden";
   $("streakColorRow").className = params.streaks > 0 ? "row sub" : "row sub hidden";
   $("starRaysRow").className = params.stars > 0 ? "row sub" : "row sub hidden";
   $("hazeColorRow").className = params.haze > 0 ? "row sub" : "row sub hidden";
-  for (const [id, key] of COLOR_FIELDS) { $("hex-" + id).value = params[key]; $("swatch-" + id).style.backgroundColor = params[key]; }
-  $("glowBlend").value = params.glowBlend;
-  $("starRays").value = String(params.starRays);
+  for (const [id, key] of COLOR_FIELDS) { $("swatch-" + id).style.backgroundColor = params[key]; $("hexl-" + id).textContent = params[key]; }
+  syncSeg("blendSeg", params.glowBlend);
+  syncSeg("raysSeg", params.starRays);
+  syncSwitches();
   $("apply").textContent = target === "document" ? "Anwenden" : "Auf Ebene anwenden";
 }
 
@@ -355,49 +429,29 @@ function buildSections() {
   let open = {};
   try { open = Object.assign({}, SEC_DEFAULT, JSON.parse(localStorage.getItem(SEC_KEY) || "{}")); } catch (e) { open = Object.assign({}, SEC_DEFAULT); }
   document.querySelectorAll(".sec").forEach((sec) => {
-    const name = sec.dataset.sec, head = sec.querySelector(".sec-head"), chev = sec.querySelector(".chev");
-    const apply = () => { sec.className = open[name] ? "sec" : "sec collapsed"; chev.textContent = open[name] ? "▾" : "▸"; };
+    const name = sec.dataset.sec, head = sec.querySelector(".sec-head");
+    const apply = () => { sec.className = open[name] ? "sec open" : "sec"; };
     head.addEventListener("click", () => { open[name] = !open[name]; apply(); try { localStorage.setItem(SEC_KEY, JSON.stringify(open)); } catch (e) { /* egal */ } });
     apply();
   });
 }
 function bindControls() {
+  bindSwitch("liveCanvas");
+  bindSwitch("previewOriginal");
   document.querySelectorAll("#colorSeg .seg-btn").forEach((el) => el.addEventListener("click", () => { params.colorMode = el.dataset.color; activeLook = null; syncUI(); changed(); }));
   document.querySelectorAll("#targetSeg .seg-btn").forEach((el) => el.addEventListener("click", () => {
     target = el.dataset.target; saveTarget(); loadedKey = null; previewSrc = null; thumbSrc = null; syncUI(); refreshPreviewSource();
   }));
   document.querySelectorAll("#previewModeSeg .seg-btn").forEach((el) => el.addEventListener("click", () => { previewMode = el.dataset.mode; syncUI(); refreshPreviewSource(); }));
-  $("glowBlend").addEventListener("change", (e) => { params.glowBlend = e.target.value; activeLook = null; syncUI(); changed(); });
-  $("starRays").addEventListener("change", (e) => { params.starRays = Number(e.target.value); activeLook = null; syncUI(); changed(); });
-  for (const [id, key] of COLOR_FIELDS) {
-    $("hex-" + id).addEventListener("change", (e) => {
-      let v = String(e.target.value).trim(); if (v[0] !== "#") v = "#" + v;
-      if (/^#[0-9a-f]{6}$/i.test(v)) params[key] = v.toLowerCase();
-      activeLook = null; syncUI(); changed();
-    });
-    $("swatch-" + id).addEventListener("click", () => pickColor(key));
-  }
+  for (const [id, key] of COLOR_FIELDS) $("swatch-" + id).addEventListener("click", () => openColorPop(key, popAnchor(id)));
   $("previewOriginal").addEventListener("change", () => renderPreview());
   $("refreshPreview").addEventListener("click", () => { previewSrc = null; refreshPreviewSource(); });
-  $("presetSelect").addEventListener("change", (e) => {
-    const src = loadUserPresets()[e.target.value];
-    if (!src) return;
-    params = Core.sanitize(src); activeLook = null;
-    syncUI(); changed();
-    setStatus(`Preset „${e.target.value}“ geladen.`);
-  });
   $("presetSave").addEventListener("click", () => {
     const name = String($("presetName").value || "").trim();
-    if (!name) return setStatus("Bitte einen Namen für das Preset eingeben.", true);
+    if (!name) return setStatus("Gib dem Preset zuerst einen Namen.", true);
     const user = loadUserPresets(); user[name] = Object.assign({}, params); saveUserPresets(user);
     rebuildPresetSelect(); $("presetName").value = "";
     setStatus(`Preset „${name}“ gespeichert.`);
-  });
-  $("presetDelete").addEventListener("click", () => {
-    const v = $("presetSelect").value;
-    if (!v) return setStatus("Wähle zuerst ein eigenes Preset aus.", true);
-    const user = loadUserPresets(); delete user[v]; saveUserPresets(user); rebuildPresetSelect();
-    setStatus("Preset gelöscht.");
   });
   $("resetAll").addEventListener("click", () => { params = Object.assign({}, Core.DEFAULTS); activeLook = Core.PRESETS[0].id; syncUI(); changed(); });
   $("liveCanvas").addEventListener("change", (e) => {
@@ -418,10 +472,9 @@ async function pickColor(key) {
       res = await batchPlay([{ _obj: "showColorPicker", _target: { _ref: "application" }, context: HIST, color: { _obj: "RGBColor", red: c0.r, grain: c0.g, blue: c0.b } }], {});
     }, { commandName: "Farbe wählen" });
     const c = res && res[0] && (res[0].RGBFloatColor || res[0].color);
-    if (c && c.red !== undefined) { params[key] = rgbToHex(c.red, c.grain !== undefined ? c.grain : c.green, c.blue); activeLook = null; syncUI(); changed(); }
+    if (c && c.red !== undefined) { params[key] = rgbToHex(c.red, c.grain !== undefined ? c.grain : c.green, c.blue); activeLook = null; syncUI(); changed(); if (popKey === key) { popKey = null; openColorPop(key, popAnchor(key)); } }
   } catch (e) { setStatus("Farbwähler nicht verfügbar – Hex-Wert eintippen.", true); }
 }
-
 
 const debouncedPreview = debounce(() => renderPreview(), 60);
 function changed() {
@@ -1059,18 +1112,16 @@ const onPsEvent = debounce(() => {
 
 async function init() {
   log("START", { ps: app.version });
-  buildSliders();
-  buildSections();
-  buildStatic();
-  bindControls();
-  syncUI();
+  for (const [name, fn] of [["Regler", buildSliders], ["Bereiche", buildSections], ["Bedienelemente", buildStatic], ["Ereignisse", bindControls], ["Anzeige", syncUI]]) {
+    try { fn(); } catch (e) { log("FEHLER beim Aufbau: " + name, String(e && e.stack || e)); }
+  }
   try { action.addNotificationListener(["select", "make", "delete", "open", "close", "set", "move", "transform", "placedLayerEditContents"], onPsEvent); }
   catch (e) { log("Event-Listener nicht verfügbar", String(e)); }
-  await refreshPreviewSource();
   // Entwickler-Hook: eine Datei „run-selftest“ im Datenordner startet den Selbsttest (und wird gelöscht)
   setInterval(async () => {
     if (busy || selfTestRunning) return;
     try { const f = await (await lfs.getDataFolder()).getEntry("run-selftest"); await f.delete(); runSelfTest(); } catch (e) { /* kein Auftrag */ }
   }, 3000);
+  try { await refreshPreviewSource(); } catch (e) { log("FEHLER Vorschau", String(e && e.stack || e)); }
 }
 init();

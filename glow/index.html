@@ -8,31 +8,34 @@
   <div class="layout">
   <div class="top">
     <div class="header">
-      <span class="brand"><span class="dot"></span>MS<span class="brand-name">GLOW</span></span>
+      <span class="brand"><span class="dot"></span><span class="brand-ms">MS</span><span class="brand-name">Glow</span></span>
       <span id="targetName" class="target-name">–</span>
     </div>
 
     <div id="previewBox" class="preview">
       <img id="preview" class="hidden">
       <div id="previewMsg" class="preview-msg">Dokument öffnen…</div>
+      <div class="preview-tools">
+        <div class="seg mini" id="previewModeSeg">
+          <div class="seg-btn active" data-mode="fit" title="Ganzes Bild">Ganz</div>
+          <div class="seg-btn" data-mode="detail" title="Ausschnitt in Originalgröße">1:1</div>
+        </div>
+        <div class="switch small" data-for="previewOriginal" data-kind="small" title="Vorschau ohne Effekt"><span class="knob"></span><span class="sw-label">Vorher</span></div>
+        <input type="checkbox" id="previewOriginal" class="hidden">
+      </div>
     </div>
-    <div class="row tools">
-      <div class="seg grow" id="targetSeg">
-        <div class="seg-btn" data-target="document">Dokument</div>
-        <div class="seg-btn" data-target="layers">Ebene</div>
-      </div>
-      <div class="seg small" id="previewModeSeg">
-        <div class="seg-btn active" data-mode="fit" title="Ganzes Bild">Ganz</div>
-        <div class="seg-btn" data-mode="detail" title="Ausschnitt in Originalgröße">1:1</div>
-      </div>
-      <label class="chip" title="Vorschau ohne Effekt"><input type="checkbox" id="previewOriginal">Vorher</label>
+
+    <div class="seg target" id="targetSeg">
+      <div class="seg-btn" data-target="document">Ganzes Dokument</div>
+      <div class="seg-btn" data-target="layers">Nur Ebene</div>
     </div>
     <div id="targetInfo" class="target-info"></div>
 
     <div id="secStrengthTop" class="strength"></div>
-    <div class="row actions">
-      <div class="btn primary grow" id="apply">Anwenden</div>
-      <label class="chip live" title="Änderungen direkt im Dokument anzeigen"><input type="checkbox" id="liveCanvas">Live</label>
+    <div class="actions">
+      <div class="btn primary" id="apply">Anwenden</div>
+      <div class="switch" data-for="liveCanvas" title="Änderungen sofort im Dokument zeigen"><span class="knob"></span><span class="sw-label">Live</span></div>
+      <input type="checkbox" id="liveCanvas" class="hidden">
       <div class="btn ghost" id="remove" title="Effekt aus dem Dokument entfernen">Entfernen</div>
     </div>
     <div id="status" class="status"></div>
@@ -42,79 +45,66 @@
   <div class="wrap">
 
     <div class="sec" data-sec="looks">
-      <div class="sec-head"><span class="chev">▾</span>Looks <span id="lookName" class="muted"></span></div>
+      <div class="sec-head"><span class="sec-title">Looks</span><span id="lookName" class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body"><div id="lookGrid" class="look-grid"></div></div>
     </div>
 
     <div class="sec" data-sec="glow">
-      <div class="sec-head"><span class="chev">▾</span>Glow</div>
+      <div class="sec-head"><span class="sec-title">Glow</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="secGlowMain"></div>
-        <div class="row color-row">
-          <span class="ctl-label">Farbe</span>
+        <div class="field">
+          <span class="field-label">Farbe</span>
           <div class="seg grow" id="colorSeg">
             <div class="seg-btn" data-color="original">Vom Licht</div>
             <div class="seg-btn" data-color="tint">Eigene</div>
           </div>
-          <div id="tintRow" class="swatch-wrap">
-            <div id="swatch-tint" class="swatch" title="Farbe wählen"></div>
-            <input type="text" id="hex-tint" class="hex" maxlength="7">
-          </div>
+          <div id="tintRow" class="swatch-wrap"><div id="swatch-tint" class="swatch" title="Farbe wählen"></div><span id="hexl-tint" class="hex-label"></span></div>
         </div>
       </div>
     </div>
 
     <div class="sec" data-sec="effects">
-      <div class="sec-head"><span class="chev">▾</span>Effekte <span class="muted">· 0 % = aus</span></div>
+      <div class="sec-head"><span class="sec-title">Effekte</span><span class="sec-meta">0 % ist aus</span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="secHalation"></div>
         <div id="secDiffusion"></div>
         <div id="secHaze"></div>
-        <div id="hazeColorRow" class="row sub">
-          <span class="ctl-label">Dunst-Farbe</span>
-          <div id="swatch-hazeColor" class="swatch"></div>
-          <input type="text" id="hex-hazeColor" class="hex" maxlength="7">
-        </div>
+        <div id="hazeColorRow" class="row sub"><span class="field-label">Farbe</span><div id="swatch-hazeColor" class="swatch"></div><span id="hexl-hazeColor" class="hex-label"></span></div>
         <div id="secStreaks"></div>
-        <div id="streakColorRow" class="row sub">
-          <span class="ctl-label">Streifen-Farbe</span>
-          <div id="swatch-streakColor" class="swatch"></div>
-          <input type="text" id="hex-streakColor" class="hex" maxlength="7">
-        </div>
+        <div id="streakColorRow" class="row sub"><span class="field-label">Farbe</span><div id="swatch-streakColor" class="swatch"></div><span id="hexl-streakColor" class="hex-label"></span></div>
         <div id="secStars"></div>
-        <div id="starRaysRow" class="row sub"><span class="ctl-label">Strahlen</span><select id="starRays" class="grow"></select></div>
+        <div id="starRaysRow" class="row sub"><span class="field-label">Strahlen</span><div class="seg grow" id="raysSeg"></div></div>
       </div>
     </div>
 
     <div class="sec" data-sec="fine">
-      <div class="sec-head"><span class="chev">▾</span>Feintuning</div>
+      <div class="sec-head"><span class="sec-title">Feintuning</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
         <div id="secFine"></div>
-        <div class="row"><span class="ctl-label">Mischmodus</span><select id="glowBlend" class="grow"></select></div>
+        <div class="field"><span class="field-label">Glow-Art</span><div class="seg grow" id="blendSeg"></div></div>
       </div>
     </div>
 
     <div class="sec" data-sec="more">
-      <div class="sec-head"><span class="chev">▾</span>Mehr</div>
+      <div class="sec-head"><span class="sec-title">Eigene Presets &amp; Werkzeuge</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
       <div class="sec-body">
+        <div id="presetList" class="preset-list"></div>
         <div class="row">
-          <select id="presetSelect" class="grow"></select>
-        </div>
-        <div class="row">
-          <input type="text" id="presetName" class="grow" placeholder="Eigenes Preset speichern…">
+          <input type="text" id="presetName" class="grow" placeholder="Name für dieses Preset">
           <div class="btn small" id="presetSave">Speichern</div>
-          <div class="btn small ghost" id="presetDelete">Löschen</div>
         </div>
-        <div class="row">
+        <div class="row tools-row">
           <div class="btn small ghost" id="resetAll">Zurücksetzen</div>
           <div class="btn small ghost" id="verify" title="Vergleicht das Ergebnis im Dokument mit den Einstellungen">Prüfen</div>
           <div class="btn small ghost" id="selfTest" title="Legt ein Testdokument an und prüft alle Funktionen">Selbsttest</div>
-          <div class="btn small ghost" id="refreshPreview" title="Vorschau neu laden">↻</div>
+          <div class="btn small ghost" id="refreshPreview" title="Vorschau neu laden">Vorschau neu</div>
         </div>
-        <div class="hint">MS Glow legt eine Gruppe mit echten Ebenen an (Glow, Halation, Diffusion, Dunst, Lichtstreifen, Sterne). Sie hellen nur auf, das Original bleibt unverändert. Bei „Ebene“ liegt das Original in der Gruppe, Entfernen stellt es wieder her.</div>
+        <div class="hint">MS Glow legt eine Gruppe mit echten Ebenen an. Sie hellen nur auf, dein Original bleibt unverändert. Bei „Nur Ebene“ liegt das Original in der Gruppe; Entfernen stellt es wieder her.</div>
       </div>
     </div>
 
+    <div id="colorPop" class="color-pop hidden"></div>
   </div>
   </div>
   </div>
