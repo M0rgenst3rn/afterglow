@@ -21,7 +21,7 @@ while x < W:
     d.rectangle([x, H - bh, x + bw, H], fill=(14, 12, 24))
     for wy in range(H - bh + int(14 * s), H - int(10 * s), int(22 * s)):
         for wx in range(x + int(8 * s), x + bw - int(12 * s), int(18 * s)):
-            if random.random() < 0.35:
+            if random.random() < 0.18:
                 c = random.choice([(255, 214, 140), (255, 190, 110), (200, 220, 255)])
                 d.rectangle([wx, wy, wx + int(7 * s), wy + int(10 * s)], fill=c)
     x += bw + int(4 * s)

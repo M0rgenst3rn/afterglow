@@ -289,24 +289,58 @@ function renderStreaks(opts, ls) {
     c[0] = Math.min(1, v * (col[0] * 0.8 + 0.2)); c[1] = Math.min(1, v * (col[1] * 0.8 + 0.2)); c[2] = Math.min(1, v * (col[2] * 0.8 + 0.2));
   });
 }
-// Sternfilter: 4/6/8 Strahlen an den hellsten Punkten, in deren Farbe
+// Maximum-Filter (quadratisches Fenster, Radius r Zellen), getrennt in x und y
+function maxFilter(f, r) {
+  const { a, w, h } = f, t = new Float32Array(w * h), out = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let m = 0; for (let k = Math.max(0, x - r); k <= Math.min(w - 1, x + r); k++) m = Math.max(m, a[y * w + k]); t[y * w + x] = m; }
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let m = 0; for (let k = Math.max(0, y - r); k <= Math.min(h - 1, y + r); k++) m = Math.max(m, t[k * w + x]); out[y * w + x] = m; }
+  return out;
+}
+// Sternfilter: 4/6/8 Strahlen – nur an einzelnen Lichtpunkten (lokale Helligkeits-Maxima wie Lampen, Glanzlichter),
+// nicht an jeder hellen Kante; sonst würde helle Schrift zu einem Block aus Strahlen.
 function renderStars(opts, ls) {
   const g = geometry(opts), p = g.p, { w, h, N } = g;
   if (p.stars <= 0) return null;
-  const len = p.starLength / 100 * 30 * g.unit, f = Math.max(1, Math.floor(len / 30));
-  const hot = hotSpots(ls, N, 0.8, w, h, g.unit, 3), amt = p.stars / 100 * 7, dirs = p.starRays / 2;
-  const chans = hot.map((ch) => shrink(ch, w, h, f));
-  const acc = chans.map((c) => ({ a: new Float32Array(c.a.length), w: c.w, h: c.h }));
+  const len = p.starLength / 100 * 15 * g.unit, f = Math.max(1, Math.floor(len / 30));
+  const amt = p.stars / 100 * 1.1, dirs = p.starRays / 2;
+  const lum = new Float32Array(N);
+  for (let i = 0; i < N; i++) lum[i] = 0.299 * ls.R[i] + 0.587 * ls.G[i] + 0.114 * ls.B[i];
+  const ch = [ls.R, ls.G, ls.B].map((c) => shrink(c, w, h, f)), L = shrink(lum, w, h, f);
+  const Lb = { a: blur2(L.a, L.w, L.h, 1.2), w: L.w, h: L.h };
+  // Umgebung (ca. 4 % der Bildhöhe) und Fenster für die Maxima (ca. 2,5 %)
+  const env = blur2(Lb.a, L.w, L.h, Math.max(2, g.unit * 4 / f)), mx = maxFilter(Lb, Math.max(2, Math.round(g.unit * 2.5 / f)));
+  const pts = [new Float32Array(L.a.length), new Float32Array(L.a.length), new Float32Array(L.a.length)];
+  for (let j = 0; j < L.a.length; j++) {
+    const v = Lb.a[j];
+    if (v < 0.35 || v < mx[j] - 1e-6 || v < env[j] * 1.35) continue;   // nur echte, herausragende Spitzen
+    const k = Math.min(1, (v - env[j]) * 2) * Math.pow(smooth(0.35, 0.95, v), 3);   // die hellsten Punkte dominieren
+    for (let c = 0; c < 3; c++) pts[c][j] = ch[c].a[j] / Math.max(1e-4, L.a[j]) * v * k;
+  }
+  const acc = pts.map((a) => ({ a: new Float32Array(a.length), w: L.w, h: L.h }));
   for (let d = 0; d < dirs; d++) {
     const ang = (p.starAngle + d * 180 / dirs) * Math.PI / 180, dx = Math.cos(ang), dy = Math.sin(ang);
-    for (let c = 0; c < 3; c++) { const r = streakBlur(chans[c], dx, dy, len / f); for (let j = 0; j < r.a.length; j++) acc[c].a[j] += r.a[j]; }
+    for (let c = 0; c < 3; c++) { const r = rayBlur({ a: pts[c], w: L.w, h: L.h }, dx, dy, len / f); for (let j = 0; j < r.length; j++) acc[c].a[j] += r[j]; }
   }
   return toRGBA(N, (i, c) => {
     const x = i % w, y = (i / w) | 0;
-    const v = [at(acc[0], f, x, y), at(acc[1], f, x, y), at(acc[2], f, x, y)];
-    const l = (v[0] + v[1] + v[2]) / 3;
-    for (let k = 0; k < 3; k++) c[k] = Math.min(1, (v[k] * 0.7 + l * 0.3) * amt);   // Strahlen etwas heller als die Quelle
+    const v = [at(acc[0], f, x, y), at(acc[1], f, x, y), at(acc[2], f, x, y)], l = (v[0] + v[1] + v[2]) / 3;
+    for (let k = 0; k < 3; k++) c[k] = Math.min(1, (v[k] * 0.6 + l * 0.4) * amt);
   });
+}
+// Strahl von einzelnen Punkten: Summe entlang der Richtung, hell am Punkt, spitz auslaufend
+function rayBlur(f, dx, dy, len) {
+  const { a, w, h } = f, out = new Float32Array(w * h), L = Math.max(1, Math.round(len));
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const v = a[y * w + x];
+    if (!v) continue;
+    for (let s = -L; s <= L; s++) {
+      const xx = Math.round(x + dx * s), yy = Math.round(y + dy * s);
+      if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+      const t = 1 - Math.abs(s) / (L + 1);
+      out[yy * w + xx] += v * t * t;
+    }
+  }
+  return out;
 }
 
 // Ebenen von oben nach unten, wie sie in der Gruppe liegen
@@ -355,7 +389,7 @@ function composite(res, w, h, base) {
 function reachPct(p) {
   p = sanitize(p);
   return Math.max(p.amount > 0 ? p.radius / 100 * 50 : 0, p.halation > 0 ? p.halationRadius / 100 * 12 : 0, p.diffusion > 0 ? p.diffusionRadius / 100 * 16 : 0,
-    p.streaks > 0 ? p.streakLength / 100 * 60 : 0, p.stars > 0 ? p.starLength / 100 * 30 : 0) + 2;
+    p.streaks > 0 ? p.streakLength / 100 * 60 : 0, p.stars > 0 ? p.starLength / 100 * 15 : 0) + 2;
 }
 
 const api = { DEFAULTS, BLENDS, RAYS, PRESETS, RANGES, LAYERS, presetParams, sanitize, geometry, lightSources, renderLayer, render, composite, layerKeys, reachPct, hexRgb };
