@@ -1,26 +1,30 @@
 <p align="center">
-  <img src="docs/images/hero.png" alt="MS Glow" width="100%">
+  <img src="docs/images/hero.png" alt="Morgenstern Glow" width="100%">
 </p>
 
 <p align="center">
   <b>Realistisches Leuchten für Photoshop: weicher Glow mit physikalischem Lichtabfall, Halation, Pro-Mist,
   anamorphe Lichtstreifen, Sternfilter und Dunst – für das ganze Dokument oder einzelne Ebenen, nicht-destruktiv.</b><br>
   <sub>Photoshop 2023 (24.2) oder neuer · UXP-Panel</sub><br>
-  <sub><b>MS</b> steht für <b>Morgenstern</b>: freie Photoshop-Tools · <a href="https://github.com/M0rgenst3rn/ms-distress">MS Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">MS Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">MS Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">MS Phase</a> · <b>MS Glow</b></sub>
+  <sub>Freie Photoshop-Tools von <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <b>Morgenstern Glow</b></sub>
 </p>
 
 ---
 
-## Was ist MS Glow?
+## Was ist Morgenstern Glow?
 
-MS Glow lässt die hellen Stellen deines Bilds leuchten, wie Licht durch eine Diffusionslinse oder auf altem
+Morgenstern Glow lässt die hellen Stellen deines Bilds leuchten, wie Licht durch eine Diffusionslinse oder auf altem
 Filmmaterial. Das Leuchten fällt wie echtes Licht ab: hell und dicht an der Lichtquelle, mit einem langen,
 weichen Ausläufer. Dazu kommen Halation, Pro-Mist, Dunst, anamorphe Lichtstreifen, ein Sternfilter und Farbsäume.
 
 Alles wird prozedural berechnet, ohne Bilddateien. Jeder Effekt wird eine eigene Ebene, die dein Artwork nur
 aufhellt. Das Original bleibt unverändert.
 
-<p align="center"><img src="docs/images/vorher-nachher.png" alt="Vorher und Nachher"></p>
+<p align="center"><img src="docs/images/vorher-nachher.png" alt="Chrome-Schrift vorher und nachher"></p>
+
+Alle Bilder hier zeigen denselben Ablauf wie in Photoshop: eine Schrift, mit
+[Morgenstern Render](https://github.com/M0rgenst3rn/ms-render) in Chrome verwandelt, und darauf Morgenstern Glow
+mit „Nur Ebene“.
 
 ### Highlights
 
@@ -43,12 +47,11 @@ Panel zeigen jeden Look mit deinem eigenen Dokument oder deiner Ebene.
 
 ## Aura: nur außen leuchten
 
-<p align="center"><img src="docs/images/aura.png" alt="Chrome-Schrift mit Aura"></p>
+<p align="center"><img src="docs/images/aura.png" alt="Glow über allem und nur außen im Vergleich"></p>
 
-Mit **Nur außen** bleibt das Objekt selbst unverändert, und das Leuchten liegt nur drumherum. Im Beispiel ist das
-eine Chrome-Schrift aus [MS Render](https://github.com/M0rgenst3rn/ms-render) mit dem Look **Chrome-Aura**: Das
-Silber bleibt silbern, der Schein ist blau-violett. Bei „Nur Ebene“ nimmt MS Glow genau die Form der
-Ebene, im ganzen Dokument alles, was sich deutlich vom dunklen Hintergrund abhebt.
+Links leuchtet auch die Schrift selbst, das Chrome wird hell und blau. Rechts ist **Nur außen** eingeschaltet:
+Das Chrome bleibt Chrome, und das Licht liegt nur drumherum. Bei „Nur Ebene“ nimmt Morgenstern Glow genau die
+Form der Ebene, im ganzen Dokument alles, was sich deutlich vom dunklen Hintergrund abhebt.
 
 ## Die Effekte
 
@@ -176,5 +179,5 @@ Verbindung zu Adobe.
 
 ---
 
-<p align="center"><sub>MS Glow · ein Tool von <b>Morgenstern</b><br>
+<p align="center"><sub>Morgenstern Glow<br>
 Entwickelt von Linus Leinberger</sub></p>
