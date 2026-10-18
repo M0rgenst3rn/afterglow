@@ -222,15 +222,15 @@ function renderGlow(opts, ls) {
     return out;
   });
   const prot = p.protect / 100, out = p.outer / 100;
-  // „nur außen“: Abdeckung ganz leicht weichzeichnen, damit der Schein sauber an der Kante beginnt
-  const cov = out > 0 ? blur2(ls.C, w, h, Math.max(1, g.unit * 0.25)) : null;
+  // „nur außen“: die (kantengeglättete) Form des Objekts – innen kein Glow, der Schein beginnt an der Kante
+  const cov = out > 0 ? ls.C : null;
   return toRGBA(N, (i, c) => {
     const x = i % w, y = (i / w) | 0;
     for (let ch = 0; ch < 3; ch++) {
       let v = 0;
       const lv = levels[ch], ww = wc[ch];
       for (let k = 0; k < K; k++) v += ww[k] * at(lv[k], lv[k].s, x, y);
-      c[ch] = Math.min(1, v * amt * (1 - prot * ls.L[i]) * (cov ? 1 - out * Math.min(1, cov[i] * 1.4) : 1));
+      c[ch] = Math.min(1, v * amt * (1 - prot * ls.L[i]) * (cov ? 1 - out * Math.min(1, cov[i] * 1.15) : 1));
     }
   });
 }
