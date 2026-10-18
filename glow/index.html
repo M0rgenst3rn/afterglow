@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="glow">
+  <div class="layout">
+  <div class="top">
+    <div class="header">
+      <span class="title"><b>MS</b> GLOW</span>
+      <span id="targetName" class="layer-name">–</span>
+    </div>
+
+    <div id="previewBox" class="preview-box tall">
+      <img id="preview" class="hidden">
+      <div id="previewMsg" class="preview-msg">Dokument öffnen…</div>
+    </div>
+    <div class="seg target" id="targetSeg">
+      <div class="seg-btn" data-target="document">▣ Ganzes Dokument</div>
+      <div class="seg-btn" data-target="layers">◧ Nur ausgewählte Ebene</div>
+    </div>
+    <div id="targetInfo" class="target-info"></div>
+    <div class="seg" id="previewModeSeg">
+      <div class="seg-btn active" data-mode="fit">Ganzes Bild</div>
+      <div class="seg-btn" data-mode="detail">Detail 1:1</div>
+    </div>
+    <div class="row between">
+      <label class="check"><input type="checkbox" id="previewOriginal"> Original zeigen</label>
+      <label class="check live" title="Änderungen direkt im Dokument anzeigen"><input type="checkbox" id="liveCanvas"> Live</label>
+      <sp-action-button size="s" quiet id="refreshPreview" title="Vorschau neu laden">↻</sp-action-button>
+    </div>
+
+    <div class="strength-row" id="secStrengthTop"></div>
+    <div class="actions">
+      <sp-button size="s" variant="cta" id="apply">Look anwenden</sp-button>
+      <sp-button size="s" variant="secondary" id="remove">Entfernen</sp-button>
+      <sp-action-button size="s" quiet id="verify" title="Vergleicht das Ergebnis im Dokument mit den aktuellen Einstellungen">Prüfen</sp-action-button>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="scroller">
+  <div class="wrap">
+    <div class="section first">
+      <div class="section-title">Looks <span id="lookName" class="muted"></span></div>
+      <div id="lookGrid" class="look-grid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Lichtquellen</div>
+      <div class="hint">Welche Stellen leuchten: alles über der Schwelle, auf Wunsch nur ein Farbbereich.</div>
+      <div id="secSource"></div>
+      <div id="rangeRow" class="row">
+        <span class="ctl-label">Nur diese Farbe</span>
+        <div id="swatch-rangeColor" class="swatch" title="Farbe, die leuchten soll"></div>
+        <input type="text" id="hex-rangeColor" class="hex" maxlength="7">
+      </div>
+      <div id="secRange"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Glow</div>
+      <div id="secGlow"></div>
+      <div class="seg" id="colorSeg">
+        <div class="seg-btn" data-color="original">Farbe des Lichts</div>
+        <div class="seg-btn" data-color="tint">Eigene Farbe</div>
+      </div>
+      <div id="tintRow" class="row">
+        <span class="ctl-label">Glow-Farbe</span>
+        <div id="swatch-tint" class="swatch" title="Farbe wählen"></div>
+        <input type="text" id="hex-tint" class="hex" maxlength="7">
+      </div>
+      <div class="row"><span class="ctl-label">Mischmodus</span><select id="glowBlend" class="grow"></select></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Film &amp; Linse</div>
+      <div id="secHalation"></div>
+      <div id="halationColorRow" class="row">
+        <span class="ctl-label">Halation-Farbe</span>
+        <div id="swatch-halationColor" class="swatch"></div>
+        <input type="text" id="hex-halationColor" class="hex" maxlength="7">
+      </div>
+      <div id="secDiffusion"></div>
+      <div id="secStreaks"></div>
+      <div id="streakColorRow" class="row">
+        <span class="ctl-label">Streifen-Farbe</span>
+        <div id="swatch-streakColor" class="swatch"></div>
+        <input type="text" id="hex-streakColor" class="hex" maxlength="7">
+      </div>
+      <div id="secStars"></div>
+      <div id="starRaysRow" class="row"><span class="ctl-label">Strahlen</span><select id="starRays" class="grow"></select></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Ebenen im Dokument</div>
+      <div class="hint">MS Glow legt eine Gruppe mit echten Ebenen an: <b>Glow</b>, <b>Halation</b>, <b>Diffusion</b> (Negativ multiplizieren), <b>Lichtstreifen</b> und <b>Sterne</b> (Linear abwedeln). Sie hellen nur auf – das Original bleibt unverändert. Bei Ebenen liegt das Original sichtbar in der Gruppe, Entfernen stellt es wieder her. Deckkraft und Mischmodus lassen sich auch direkt in Photoshop ändern.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Eigene Presets</div>
+      <select id="presetSelect"></select>
+      <div class="row">
+        <input type="text" id="presetName" class="grow" placeholder="Eigenes Preset…">
+        <sp-action-button size="s" id="presetSave">Speichern</sp-action-button>
+        <sp-action-button size="s" quiet id="presetDelete">Löschen</sp-action-button>
+      </div>
+      <div class="row">
+        <sp-action-button size="s" quiet id="resetAll">Alles zurücksetzen</sp-action-button>
+        <sp-action-button size="s" quiet id="selfTest" title="Legt ein Testdokument an und prüft alle Funktionen">Selbsttest</sp-action-button>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
