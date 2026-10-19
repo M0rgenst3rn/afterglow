@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="docs/images/hero.png" alt="Morgenstern Glow" width="100%">
+  <img src="docs/images/hero.png" alt="Afterglow" width="100%">
 </p>
 
 <p align="center">
   <b>Realistic glow for Photoshop: soft light with a physical falloff, halation, Pro-Mist, anamorphic
   streaks, star filter and haze – for the whole document or single layers, non-destructive.</b><br>
   <sub>Photoshop 2023 (24.2) or newer · UXP panel</sub><br>
-  <sub>Free tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <b>Morgenstern Glow</b> · <a href="https://github.com/M0rgenst3rn/ms-gradients">Morgenstern Gradients</a> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a></sub>
+  <sub>More tools by <b>Linus Leinberger</b> · <b>Afterglow</b> · <a href="https://github.com/M0rgenst3rn/asciiwave">Asciiwave</a> · <a href="https://github.com/M0rgenst3rn/gradient-library">Gradient Library</a> · <a href="https://github.com/M0rgenst3rn/gridwork">Gridwork</a> · <a href="https://github.com/M0rgenst3rn/grime">Grime</a> · <a href="https://github.com/M0rgenst3rn/headliner">Headliner</a> · <a href="https://github.com/M0rgenst3rn/misprint">Misprint</a> · <a href="https://github.com/M0rgenst3rn/seamline">Seamline</a> · <a href="https://github.com/M0rgenst3rn/vhold">Vhold</a></sub>
 </p>
 
 ---
 
-## What is Morgenstern Glow?
+## What is Afterglow?
 
-Morgenstern Glow makes the bright parts of your image glow, like light through a diffusion filter or on old
+Afterglow makes the bright parts of your image glow, like light through a diffusion filter or on old
 film stock. The glow falls off like real light: bright and dense at the source, with a long, soft tail. On top
 of that there are halation, Pro-Mist, haze, anamorphic streaks, a star filter and colour fringes.
 
@@ -23,7 +23,7 @@ brightens your artwork. The original stays untouched.
 <p align="center"><img src="docs/images/before-after.png" alt="Chrome lettering before and after"></p>
 
 Every image on this page shows the same workflow as in Photoshop: lettering turned into chrome with
-[Morgenstern Render](https://github.com/M0rgenst3rn/ms-render), and Morgenstern Glow on top with "Layer only".
+[Headliner](https://github.com/M0rgenst3rn/headliner), and Afterglow on top with "Layer only".
 
 ### Highlights
 
@@ -49,7 +49,7 @@ the panel show each look with your own document or layer.
 <p align="center"><img src="docs/images/aura.png" alt="Glow over everything and outside only compared"></p>
 
 On the left the lettering itself glows too, and the chrome turns bright and blue. On the right **Outside only**
-is on: the chrome stays chrome and the light sits only around it. With "Layer only" Morgenstern Glow takes
+is on: the chrome stays chrome and the light sits only around it. With "Layer only" Afterglow takes
 exactly the shape of the layer; in the whole document it takes everything that clearly stands out from the
 dark background.
 
@@ -98,9 +98,9 @@ shows the same as the result.
 
 ## Layers in the document
 
-**Whole document**: a group **"MS Glow"** is created at the top of the document:
+**Whole document**: a group **"Afterglow"** is created at the top of the document:
 ```
-MS Glow           (group, opacity)
+Afterglow           (group, opacity)
 ├─ Stars          Linear Dodge
 ├─ Streaks        Linear Dodge
 ├─ Halation       Screen
@@ -110,7 +110,7 @@ MS Glow           (group, opacity)
 ```
 Only the layers of the effects you turned on are created.
 
-**Layer only**: every layer gets its own group **"MS Glow · name"**. The original sits inside it unchanged,
+**Layer only**: every layer gets its own group **"Afterglow · name"**. The original sits inside it unchanged,
 the effect layers above it. The glow may reach beyond the object. Layer masks of cut-out objects are
 respected: whatever the mask hides doesn't glow. **Remove** puts the original back in the same place.
 
@@ -123,7 +123,7 @@ respected: whatever the mask hides doesn't glow. **Remove** puts the original ba
    ```bash
    bash install-mac.sh
    ```
-3. (Re)start Photoshop → **Plugins › MS Glow**
+3. (Re)start Photoshop → **Plugins › Afterglow**
 
 ### Alternative: UXP Developer Tool (macOS & Windows)
 
@@ -148,7 +148,7 @@ respected: whatever the mask hides doesn't glow. **Remove** puts the original ba
 glow/                The plugin (loaded into Photoshop as is)
   manifest.json      Plugin description
   index.html         Panel UI
-  ms-ui.js/.css      Shared Morgenstern controls and design
+  ui.js/.css      Shared controls and design
   main.js            Photoshop side (groups, layers, preview, Live, verify, self-test)
   core.js            Light engine, plain JavaScript
 install-mac.sh       Packs the plugin (.ccx) and installs it
@@ -158,12 +158,12 @@ docs/images/         Example images
 
 ```bash
 node tools/render-test.js in.raw 960 540 out.png dreamy   # render a look without Photoshop
-node tools/make-showcase.js                                # rebuild the images of this README (needs Python with Pillow and Morgenstern Render next to this folder)
+node tools/make-showcase.js                                # rebuild the images of this README (needs Python with Pillow and Headliner next to this folder)
 ```
 
 ## Found a bug? Got an idea?
 
-Get in touch! The easiest way is **[Issues](https://github.com/M0rgenst3rn/ms-glow/issues)** here on GitHub:
+Get in touch! The easiest way is **[Issues](https://github.com/M0rgenst3rn/afterglow/issues)** here on GitHub:
 click **New issue** and briefly describe what happened. Your Photoshop version, operating system and a
 screenshot help a lot. All you need is a free GitHub account. Suggestions and feature requests are just as
 welcome.
@@ -181,5 +181,5 @@ Adobe and Photoshop are trademarks of Adobe Inc. This project is independent and
 
 ---
 
-<p align="center"><sub>Morgenstern Glow<br>
-Made by Linus Leinberger</sub></p>
+<p align="center"><sub>Afterglow<br>
+Made by Linus Leinberger · <a href="https://www.instagram.com/linusleinberger">Instagram @linusleinberger</a></sub></p>

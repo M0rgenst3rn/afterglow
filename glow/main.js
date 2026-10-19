@@ -1,9 +1,9 @@
 "use strict";
-// MS Glow – Photoshop-UXP-Panel.
+// Afterglow – Photoshop-UXP-Panel.
 // Light effects for the whole document or single layers, non-destructive:
-//  • Whole document: a group "MS Glow" on top with real layers (glow, halation, diffusion, streaks,
+//  • Whole document: a group "Afterglow" on top with real layers (glow, halation, diffusion, streaks,
 //    stars) that only brighten the artwork. The artwork below stays untouched.
-//  • Selected layers: each layer moves into a group "MS Glow · name"; the original stays visible inside,
+//  • Selected layers: each layer moves into a group "Afterglow · name"; the original stays visible inside,
 //    the effect layers above it (layer masks respected). Remove restores everything.
 // The settings live in the XMP of the effect layers – selecting the group loads them back into the panel.
 
@@ -14,13 +14,13 @@ const uxpStorage = require("uxp").storage;
 const lfs = uxpStorage.localFileSystem;
 
 const $ = (id) => document.getElementById(id);
-const STORE_KEY = "msglow.state.v1";
-const TARGET_KEY = "msglow.target.v1";
-const PRESET_KEY = "msglow.presets.v1";
-const GROUP_DOC = "MS Glow";
-const LAYER_PREFIX = "MS Glow · ";
-const HIST = "MS Glow";
-const XMP_NS = "http://ms-glow/1.0/";
+const STORE_KEY = "afterglow.state.v1";
+const TARGET_KEY = "afterglow.target.v1";
+const PRESET_KEY = "afterglow.presets.v1";
+const GROUP_DOC = "Afterglow";
+const LAYER_PREFIX = "Afterglow · ";
+const HIST = "Afterglow";
+const XMP_NS = "http://afterglow/1.0/";
 const MAX_PIXELS = 60e6;
 const TARGET = [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }];
 // effect layer names, including the German names of earlier versions
@@ -136,7 +136,7 @@ function log(msg, data) {
 // ---------------------------------------------------------------- XMP (settings on the effect layers)
 function xmpFor(p, sourceId) {
   const json = JSON.stringify({ params: p, sourceId: sourceId || null }).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  return `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:msglow="${XMP_NS}"><msglow:params>${json}</msglow:params></rdf:Description></rdf:RDF></x:xmpmeta>`;
+  return `<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="" xmlns:afterglow="${XMP_NS}"><afterglow:params>${json}</afterglow:params></rdf:Description></rdf:RDF></x:xmpmeta>`;
 }
 async function writeXmp(layerId, p, sourceId) {
   await batchPlay([{ _obj: "set", _target: [{ _ref: "property", _property: "XMPMetadataAsUTF8" }, { _ref: "layer", _id: layerId }], to: { _obj: "layer", XMPMetadataAsUTF8: xmpFor(p, sourceId) } }], {});
@@ -145,7 +145,7 @@ async function readXmp(layerId) {
   try {
     const r = await batchPlay([{ _obj: "get", _target: [{ _property: "XMPMetadataAsUTF8" }, { _ref: "layer", _id: layerId }] }], {});
     const x = r && r[0] && r[0].XMPMetadataAsUTF8;
-    const m = x && /<msglow:params>([\s\S]*?)<\/msglow:params>/.exec(x);
+    const m = x && /<afterglow:params>([\s\S]*?)<\/afterglow:params>/.exec(x);
     if (!m) return null;
     const o = JSON.parse(m[1].replace(/&lt;/g, "<").replace(/&amp;/g, "&"));
     return { params: Core.sanitize(o.params), sourceId: o.sourceId || null };
@@ -275,7 +275,7 @@ function downsample(src, sw, sh, ox, oy, w, h, ps) {
 
 // ---------------------------------------------------------------- Own controls
 // Deliberately no Photoshop widgets (sp-slider, native checkboxes/selects, Photoshop colour picker):
-// own sliders, switches, segments and a colour popover in the Morgenstern design.
+// own sliders, switches, segments and a colour popover in the shared design.
 
 // Slider: name and value on top, a thin track with a glowing fill below.
 // Drag, click the track, arrow keys (Shift = ×10), double-click = default, or type the value.
@@ -424,7 +424,7 @@ function syncUI() {
 }
 
 // Collapsible sections; the panel remembers what was open
-const SEC_KEY = "msglow.sections.v1";
+const SEC_KEY = "afterglow.sections.v1";
 const SEC_DEFAULT = { looks: true, glow: true, effects: true, fine: false, more: false };
 function buildSections() {
   let open = {};

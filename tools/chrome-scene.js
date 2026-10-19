@@ -1,10 +1,10 @@
 // Chrome lettering as the scene for the README images: text (Arial Black, italic) → chrome from the
-// Morgenstern Render engine (folder next to this one: ../../MS Render) → its own layer over a dark background.
+// Headliner engine (folder next to this one: ../../Headliner) → its own layer over a dark background.
 // Returns the layer (RGBA, transparent around it) and the finished image below it (RGB).
 const fs = require("fs"), path = require("path"), os = require("os"), { execFileSync } = require("child_process");
-const E = require(path.join(__dirname, "..", "..", "MS Render", "render", "engine.js"));
+const E = require(path.join(__dirname, "..", "..", "Headliner", "render", "engine.js"));
 
-const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "msglow-chrome-"));
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "afterglow-chrome-"));
 
 // text as an alpha mask (Python + Pillow)
 function textAlpha(lines, px) {

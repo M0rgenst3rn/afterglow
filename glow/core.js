@@ -1,5 +1,5 @@
 "use strict";
-// MS Glow – core engine (plain JavaScript, runs in the panel and in Node).
+// Afterglow – core engine (plain JavaScript, runs in the panel and in Node).
 // Creates light effects from the bright parts of an image. Each effect becomes its own layer that lies above the
 // original and only brightens it (Screen / Linear Dodge) – the original stays untouched:
 //   glow       soft light with a physical falloff (many stacked blur levels)

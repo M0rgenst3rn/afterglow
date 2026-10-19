@@ -1,11 +1,11 @@
-// Builds the README images with the real engine: chrome lettering (Morgenstern Render, folder next to this one)
-// as its own layer, with Morgenstern Glow on top in layer mode – the way the tool is used in Photoshop.
+// Builds the README images with the real engine: chrome lettering (Headliner, folder next to this one)
+// as its own layer, with Afterglow on top in layer mode – the way the tool is used in Photoshop.
 // node tools/make-showcase.js   (needs Python with Pillow for the lettering and labels)
 const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
 const Core = require(path.join(__dirname, "..", "glow", "core.js"));
 const { encodePNG } = require("./png.js");
 const { chromeScene } = require("./chrome-scene.js");
-const OUT = path.join(__dirname, "..", "docs", "images"), TMP = fs.mkdtempSync(path.join(require("os").tmpdir(), "msglow-"));
+const OUT = path.join(__dirname, "..", "docs", "images"), TMP = fs.mkdtempSync(path.join(require("os").tmpdir(), "afterglow-"));
 fs.mkdirSync(OUT, { recursive: true });
 
 function glow(sc, p) {
@@ -34,7 +34,7 @@ im.save(s["out"])
 `, js]);
 }
 
-// the Morgenstern look: deep blue light behind chrome
+// the signature look: deep blue light behind chrome
 const SIGNATURE = Object.assign(Core.presetParams("chromeaura"), {
   amount: 200, radius: 100, falloff: 0, gamma: 50, tint: "#3d6bff",
   haze: 50, hazeRadius: 100, hazeColor: "#2f5bff", hazeTint: 100, diffusion: 20,
@@ -49,7 +49,7 @@ const sc = chromeScene({ lines: ["GLOW"], W, H, px: 320, fill: 0.62 });
 }
 // 2) before / after
 sheet("before-after.png", "", [
-  { img: save("orig", sc.base, W, H), label: "Before", sub: "chrome from Morgenstern Render" },
+  { img: save("orig", sc.base, W, H), label: "Before", sub: "chrome from Headliner" },
   { img: save("after-sig", glow(sc, SIGNATURE), W, H), label: "After", sub: "blue light behind it" },
 ], 2, 840, 354);
 // 3) all looks

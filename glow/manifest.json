@@ -1,6 +1,6 @@
 {
-  "id": "com.linus.msglow",
-  "name": "MS Glow",
+  "id": "com.linus.afterglow",
+  "name": "Afterglow",
   "version": "0.1.0",
   "main": "index.html",
   "manifestVersion": 5,
@@ -16,7 +16,7 @@
       "type": "panel",
       "id": "glowPanel",
       "label": {
-        "default": "MS Glow"
+        "default": "Afterglow"
       },
       "minimumSize": {
         "width": 300,
