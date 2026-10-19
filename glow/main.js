@@ -62,11 +62,11 @@ let loadedKey = null;              // group whose settings were last loaded into
 
 // ---------------------------------------------------------------- Persistence
 function loadParams() { try { return Core.sanitize(JSON.parse(localStorage.getItem(STORE_KEY) || "{}")); } catch (e) { return Object.assign({}, Core.DEFAULTS); } }
-function saveParams() { try { localStorage.setItem(STORE_KEY, JSON.stringify(params)); } catch (e) { /* egal */ } }
+function saveParams() { try { localStorage.setItem(STORE_KEY, JSON.stringify(params)); } catch (e) { /* ignore */ } }
 function loadTarget() { try { return localStorage.getItem(TARGET_KEY) === "layers" ? "layers" : "document"; } catch (e) { return "document"; } }
-function saveTarget() { try { localStorage.setItem(TARGET_KEY, target); } catch (e) { /* egal */ } }
+function saveTarget() { try { localStorage.setItem(TARGET_KEY, target); } catch (e) { /* ignore */ } }
 function loadUserPresets() { try { return JSON.parse(localStorage.getItem(PRESET_KEY) || "{}"); } catch (e) { return {}; } }
-function saveUserPresets(p) { try { localStorage.setItem(PRESET_KEY, JSON.stringify(p)); } catch (e) { /* egal */ } }
+function saveUserPresets(p) { try { localStorage.setItem(PRESET_KEY, JSON.stringify(p)); } catch (e) { /* ignore */ } }
 
 // ---------------------------------------------------------------- Helpers
 function setStatus(msg, isErr) { const el = $("status"); el.textContent = msg || ""; el.className = isErr ? "status err" : "status"; }
@@ -129,7 +129,7 @@ function log(msg, data) {
   if (logLines.length > 400) logLines.splice(0, logLines.length - 400);
   clearTimeout(logTimer);
   logTimer = setTimeout(async () => {
-    try { const f = await (await lfs.getDataFolder()).createFile("glow-log.txt", { overwrite: true }); await f.write(logLines.join("\n") + "\n"); } catch (e) { /* egal */ }
+    try { const f = await (await lfs.getDataFolder()).createFile("glow-log.txt", { overwrite: true }); await f.write(logLines.join("\n") + "\n"); } catch (e) { /* ignore */ }
   }, 300);
 }
 
@@ -193,7 +193,7 @@ async function readComposite(ctx, doc, sourceBounds, targetSize, opt) {
   const show = (opt.show || []).filter((l) => !l.visible);
   let hid = null;
   if (hide.length || show.length) {
-    if (!opt.inHistory) hid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: HIST + " lesen" });
+    if (!opt.inHistory) hid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: HIST + " read" });
     for (const l of hide) l.visible = false;
     for (const l of show) l.visible = true;
   }
@@ -222,7 +222,7 @@ async function hasActiveMask(id) {
 async function readLayer(ctx, doc, layer, sourceBounds, inHistory) {
   let hid = null;
   const wasHidden = !layer.visible;
-  if (wasHidden) { if (!inHistory) hid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: HIST + " lesen" }); layer.visible = true; }
+  if (wasHidden) { if (!inHistory) hid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: HIST + " read" }); layer.visible = true; }
   const W = sourceBounds.right - sourceBounds.left, H = sourceBounds.bottom - sourceBounds.top;
   const rgba = new Uint8Array(W * H * 4);
   try {
@@ -432,7 +432,7 @@ function buildSections() {
   document.querySelectorAll(".sec").forEach((sec) => {
     const name = sec.dataset.sec, head = sec.querySelector(".sec-head");
     const apply = () => { sec.className = open[name] ? "sec open" : "sec"; };
-    head.addEventListener("click", () => { open[name] = !open[name]; apply(); try { localStorage.setItem(SEC_KEY, JSON.stringify(open)); } catch (e) { /* egal */ } });
+    head.addEventListener("click", () => { open[name] = !open[name]; apply(); try { localStorage.setItem(SEC_KEY, JSON.stringify(open)); } catch (e) { /* ignore */ } });
     apply();
   });
 }
@@ -1089,7 +1089,7 @@ async function runSelfTest() {
       return { ok: s.threshold === Core.DEFAULTS.threshold && s.amount === 200 && s.colorMode === Core.DEFAULTS.colorMode && s.tint === Core.DEFAULTS.tint && s.starRays === 6 && s.glowBlend === Core.DEFAULTS.glowBlend, s };
     });
   } catch (e) {
-    results.push({ test: "Abbruch", ok: false, details: String(e && e.stack || e) });
+    results.push({ test: "Self-test stopped", ok: false, details: String(e && e.stack || e) });
   }
   params = saved; target = savedTarget; saveTarget();
   $("liveCanvas").checked = wasLive;
